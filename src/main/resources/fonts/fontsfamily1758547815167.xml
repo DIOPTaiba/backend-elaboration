@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fontFamilies>
+	<fontFamily name="Libre Baskerville">
+		<normal><![CDATA[fonts/LibreBaskerville/LibreBaskerville-Regular.ttf]]></normal>
+		<bold><![CDATA[fonts/LibreBaskerville/LibreBaskerville-Bold.ttf]]></bold>
+		<pdfEmbedded><![CDATA[true]]></pdfEmbedded>
+		<exportFonts>
+			<export key="html"><![CDATA[< Font Name >]]></export>
+		</exportFonts>
+	</fontFamily>
+</fontFamilies>

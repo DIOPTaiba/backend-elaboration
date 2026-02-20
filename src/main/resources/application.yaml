@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: elaboration
+  datasource:
+    username: ${USERNAME}
+    driver-class-name: oracle.jdbc.OracleDriver
+    url: ${URL}
+    password: ${PASSWORD}
+  jpa:
+    database-platform: org.hibernate.dialect.OracleDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 300MB
+
+server:
+  port: ${PORT}
+
+upload: Etats/
