@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fontFamilies>
+	<fontFamily name="roboto">
+		<normal><![CDATA[fonts/roboto/Roboto-Regular.ttf]]></normal>
+		<bold><![CDATA[fonts/roboto/Roboto-Bold.ttf]]></bold>
+		<italic><![CDATA[fonts/roboto/Roboto-Italic.ttf]]></italic>
+		<boldItalic><![CDATA[fonts/roboto/Roboto-BoldItalic.ttf]]></boldItalic>
+		<pdfEmbedded><![CDATA[true]]></pdfEmbedded>
+		<exportFonts>
+			<export key="html"><![CDATA[< Font Name >]]></export>
+		</exportFonts>
+	</fontFamily>
+</fontFamilies>
