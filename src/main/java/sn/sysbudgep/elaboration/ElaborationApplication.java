@@ -8,6 +8,9 @@ public class ElaborationApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ElaborationApplication.class, args);
+		System.out.println("========================================================");
+		System.out.println("		    LE BACKEND ELABORATION A DÉMARRÉ			");
+		System.out.println("========================================================");
 	}
 
 }
