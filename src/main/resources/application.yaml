@@ -19,5 +19,7 @@ spring:
 
 server:
   port: ${PORT}
+  servlet:
+    context-path: /api
 
 upload: Etats/
