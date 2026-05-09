@@ -9,12 +9,12 @@ import sn.sysbudgep.elaboration.dto.fonctionnementInvestissement.saisieMajFonctI
 import sn.sysbudgep.elaboration.dto.fonctionnementInvestissement.saisieMajFonctInves.TypeFinDto;
 import sn.sysbudgep.elaboration.dto.fonctionnementInvestissement.saisieMajFonctInves.SourceFinDto;
 import sn.sysbudgep.elaboration.dto.fonctionnementInvestissement.saisieMajFonctInves.CategorieDepenseDto;
-import sn.sysbudgep.elaboration.entity.fonctionnementInvestissement.ExerciceProjetBud;
+import sn.sysbudgep.elaboration.entity.fonctionnementInvestissement.SaisieMajFctInves;
 
 import java.util.List;
 
 @Repository
-public interface SaisieMajFctInvesRepository extends JpaRepository<ExerciceProjetBud, Integer> {
+public interface SaisieMajFctInvesRepository extends JpaRepository<SaisieMajFctInves, Integer> {
 
     @Query(value = "SELECT EXPB_CODE, EXPB_LIB, EXPB_DEBUT " +
             "FROM vb3_exercice_projet_bud " +

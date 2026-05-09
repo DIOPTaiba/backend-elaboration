@@ -1,6 +1,5 @@
 package sn.sysbudgep.elaboration.service.impl.fonctionnementInvestissement;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sn.sysbudgep.elaboration.dto.fonctionnementInvestissement.saisieMajFonctInves.ProjetDeBudgetDto;
 import sn.sysbudgep.elaboration.dto.fonctionnementInvestissement.saisieMajFonctInves.ProgrammeDto;
@@ -15,8 +14,11 @@ import java.util.List;
 @Service
 public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
 
-    @Autowired
-    private SaisieMajFctInvesRepository saisieMajFctInvesRepository;
+    private final SaisieMajFctInvesRepository saisieMajFctInvesRepository;
+
+    public SaisieMajFctInvesServiceImpl(SaisieMajFctInvesRepository saisieMajFctInvesRepository) {
+        this.saisieMajFctInvesRepository = saisieMajFctInvesRepository;
+    }
 
     @Override
     public ProjetDeBudgetDto getProjetDeBudget(int exe) {

@@ -1,3 +1,4 @@
+/*
 package sn.sysbudgep.elaboration.entity.fonctionnementInvestissement;
 
 import jakarta.persistence.*;
@@ -22,3 +23,4 @@ public class ExerciceProjetBud {
     @Column(name = "EXPB_DEBUT")
     private Timestamp expbDebut;
 }
+*/

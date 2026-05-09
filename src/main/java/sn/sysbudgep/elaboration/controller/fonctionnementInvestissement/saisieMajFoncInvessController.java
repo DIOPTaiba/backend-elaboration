@@ -1,6 +1,5 @@
 package sn.sysbudgep.elaboration.controller.fonctionnementInvestissement;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sn.sysbudgep.elaboration.dto.fonctionnementInvestissement.saisieMajFonctInves.ProjetDeBudgetDto;
@@ -13,13 +12,16 @@ import sn.sysbudgep.elaboration.service.fonctionnementInvestissement.SaisieMajFc
 import java.util.List;
 
 @RestController
-@RequestMapping("/saisie-maj")
+@RequestMapping("/saisieMaj")
 public class saisieMajFoncInvessController {
 
-    @Autowired
-    private SaisieMajFctInvesService saisieMajFctInvesService;
+    private final SaisieMajFctInvesService saisieMajFctInvesService;
 
-    @GetMapping("/projets-budget/{exe}")
+    public saisieMajFoncInvessController(SaisieMajFctInvesService saisieMajFctInvesService) {
+        this.saisieMajFctInvesService = saisieMajFctInvesService;
+    }
+
+    @GetMapping("/projetsBudget/{exe}")
     public ResponseEntity<ProjetDeBudgetDto> getProjetDeBudget(@PathVariable int exe) {
         return ResponseEntity.ok(saisieMajFctInvesService.getProjetDeBudget(exe));
     }
@@ -31,17 +33,17 @@ public class saisieMajFoncInvessController {
         return ResponseEntity.ok(saisieMajFctInvesService.getProgrammes(secId, exercice));
     }
 
-    @GetMapping("/types-fin")
+    @GetMapping("/typesFin")
     public ResponseEntity<List<TypeFinDto>> getAllTypeFin() {
         return ResponseEntity.ok(saisieMajFctInvesService.getAllTypeFin());
     }
 
-    @GetMapping("/sources-fin/{tfinId}")
+    @GetMapping("/sourcesFin/{tfinId}")
     public ResponseEntity<List<SourceFinDto>> getSourceFinByTypeFin(@PathVariable int tfinId) {
         return ResponseEntity.ok(saisieMajFctInvesService.getSourceFinByTypeFin(tfinId));
     }
 
-    @GetMapping("/categories-depense/{proCode}")
+    @GetMapping("/categoriesDepense/{proCode}")
     public ResponseEntity<List<CategorieDepenseDto>> getCategoriesDepense(@PathVariable String proCode) {
         return ResponseEntity.ok(saisieMajFctInvesService.getCategoriesDepense(proCode));
     }
