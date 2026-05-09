@@ -1,4 +1,4 @@
-package sn.sysbudgep.elaboration.controller;
+package sn.sysbudgep.elaboration.controller.global;
 
 import org.springframework.web.bind.annotation.*;
 

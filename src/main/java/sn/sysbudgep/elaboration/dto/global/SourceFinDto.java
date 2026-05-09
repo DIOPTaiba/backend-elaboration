@@ -1,4 +1,4 @@
-package sn.sysbudgep.elaboration.dto.fonctionnementInvestissement.saisieMajFonctInves;
+package sn.sysbudgep.elaboration.dto.global;
 
 public interface SourceFinDto {
     String getSfinCode();
@@ -8,5 +8,5 @@ public interface SourceFinDto {
     Integer getSfinCodeNbe();
     Integer getSfinTyprbId();
     String getSfinBailfCode();
-    Integer getSfinTfinId();
+    String getSfinTfinId();
 }
