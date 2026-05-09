@@ -1,7 +1,7 @@
-package sn.sysbudgep.elaboration.dto.fonctionnementInvestissement.saisieMajFonctInves;
+package sn.sysbudgep.elaboration.dto.global;
 
 public interface TypeFinDto {
-    Integer getTfinId();
+    String getTfinId();
     String getTfinCode();
     String getTfinLib();
     String getTfinValid();

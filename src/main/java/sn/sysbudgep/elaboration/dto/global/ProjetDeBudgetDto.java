@@ -1,4 +1,4 @@
-package sn.sysbudgep.elaboration.dto.fonctionnementInvestissement.saisieMajFonctInves;
+package sn.sysbudgep.elaboration.dto.global;
 
 import java.sql.Timestamp;
 
