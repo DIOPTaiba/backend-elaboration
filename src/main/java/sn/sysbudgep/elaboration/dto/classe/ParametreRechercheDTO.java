@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 public class ParametreRechercheDTO {
     private int exe;
+    private String exeCode="";
     private String sectionId="";
     private String sectionCode="";
     private String proId="";

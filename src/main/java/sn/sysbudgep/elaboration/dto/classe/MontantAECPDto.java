@@ -10,9 +10,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MontantAECPDto {
-        private BigDecimal montantN1;
-        private BigDecimal montantN2;
-        private BigDecimal montantN3;
+        private BigDecimal montantN1CP;
+        private BigDecimal montantN2CP;
+        private BigDecimal montantN3CP;
         private BigDecimal montantN1AE;
         private BigDecimal montantN2AE;
         private BigDecimal montantN3AE;
