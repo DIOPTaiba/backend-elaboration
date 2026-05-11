@@ -1,7 +1,7 @@
 package sn.sysbudgep.elaboration.service.impl.fonctionnementInvestissement;
 
 import org.springframework.stereotype.Service;
-import sn.sysbudgep.elaboration.dto.fonctionnementInvestissement.saisieMajFonctInves.ChapitreProjetDeBudgetDto;
+import sn.sysbudgep.elaboration.dto.global.ChapitreDto;
 import sn.sysbudgep.elaboration.repository.fonctionnementInvestissement.ChapitreProjetDeBudgetRepository;
 import sn.sysbudgep.elaboration.service.fonctionnementInvestissement.ChapitreProjetDeBudgetService;
 
@@ -17,12 +17,12 @@ public class ChapitreProjetDeBudgetServiceImpl implements ChapitreProjetDeBudget
     }
 
     @Override
-    public List<ChapitreProjetDeBudgetDto> getChapitresInvestissement(String secId, String sfinCode, String proId, String proCode) {
+    public List<ChapitreDto> getChapitresInvestissement(String secId, String sfinCode, String proId, String proCode) {
         return chapitreProjetDeBudgetRepository.findChapitresInvestissement(secId, sfinCode, proId, proCode);
     }
 
     @Override
-    public List<ChapitreProjetDeBudgetDto> getChapitreFonctionnement(String secId, String sfinCode, String proId) {
+    public List<ChapitreDto> getChapitreFonctionnement(String secId, String sfinCode, String proId) {
         return chapitreProjetDeBudgetRepository.findChapitreFonctionnement(secId, sfinCode, proId);
     }
 }

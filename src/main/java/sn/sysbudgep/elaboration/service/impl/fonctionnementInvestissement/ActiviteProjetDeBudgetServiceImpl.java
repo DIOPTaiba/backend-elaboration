@@ -1,7 +1,7 @@
 package sn.sysbudgep.elaboration.service.impl.fonctionnementInvestissement;
 
 import org.springframework.stereotype.Service;
-import sn.sysbudgep.elaboration.dto.fonctionnementInvestissement.saisieMajFonctInves.ActiviteProjetDeBudgetDto;
+import sn.sysbudgep.elaboration.dto.global.ActiviteDto;
 import sn.sysbudgep.elaboration.repository.fonctionnementInvestissement.ActiviteProjetDeBudgetRepository;
 import sn.sysbudgep.elaboration.service.fonctionnementInvestissement.ActiviteProjetDeBudgetService;
 
@@ -17,7 +17,7 @@ public class ActiviteProjetDeBudgetServiceImpl implements ActiviteProjetDeBudget
     }
 
     @Override
-    public List<ActiviteProjetDeBudgetDto> getActivitesProjetDeBudget(String copCopId, String pappRef, String chapCode) {
+    public List<ActiviteDto> getActivitesProjetDeBudget(String copCopId, String pappRef, String chapCode) {
         return activiteProjetDeBudgetRepository.findActivitesProjetDeBudget(copCopId, pappRef, chapCode);
     }
 }

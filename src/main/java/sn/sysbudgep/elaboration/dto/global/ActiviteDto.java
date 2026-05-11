@@ -1,6 +1,6 @@
-package sn.sysbudgep.elaboration.dto.fonctionnementInvestissement.saisieMajFonctInves;
+package sn.sysbudgep.elaboration.dto.global;
 
-public interface ActiviteProjetDeBudgetDto {
+public interface ActiviteDto {
     String getCopId();
     String getCopCode();
     String getCopLibelle();

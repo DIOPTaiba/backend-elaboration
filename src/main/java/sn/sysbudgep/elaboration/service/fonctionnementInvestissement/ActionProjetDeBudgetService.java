@@ -1,9 +1,9 @@
 package sn.sysbudgep.elaboration.service.fonctionnementInvestissement;
 
-import sn.sysbudgep.elaboration.dto.fonctionnementInvestissement.saisieMajFonctInves.ActionProjetDeBudgetDto;
+import sn.sysbudgep.elaboration.dto.global.ActionDto;
 
 import java.util.List;
 
 public interface ActionProjetDeBudgetService {
-    List<ActionProjetDeBudgetDto> getActionsProjetDeBudget(String proId, String pappRef, String chapCode, String chapId);
+    List<ActionDto> getActionsProjetDeBudget(String proId, String pappRef, String chapCode, String chapId);
 }

@@ -2,7 +2,7 @@ package sn.sysbudgep.elaboration.controller.fonctionnementInvestissement;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sn.sysbudgep.elaboration.dto.fonctionnementInvestissement.saisieMajFonctInves.ActiviteProjetDeBudgetDto;
+import sn.sysbudgep.elaboration.dto.global.ActiviteDto;
 import sn.sysbudgep.elaboration.service.fonctionnementInvestissement.ActiviteProjetDeBudgetService;
 
 import java.util.List;
@@ -19,7 +19,7 @@ public class ActiviteProjetDeBudgetController {
     }
 
     @GetMapping("/activitesProjetDeBudget/{copCopId}/{pappRef}/{chapCode}")
-    public ResponseEntity<List<ActiviteProjetDeBudgetDto>> getActivitesProjetDeBudget(
+    public ResponseEntity<List<ActiviteDto>> getActivitesProjetDeBudget(
             @PathVariable String copCopId,
             @PathVariable String pappRef,
             @PathVariable String chapCode) {
