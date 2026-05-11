@@ -12,13 +12,10 @@ import sn.sysbudgep.elaboration.dto.classe.MontantAECPDto;
 import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
 import sn.sysbudgep.elaboration.dto.global.LigneBudgetDto;
 import sn.sysbudgep.elaboration.repository.fonctionnementInvestissement.SaisieMajFctInvesRepository;
-import sn.sysbudgep.elaboration.repository.global.ProgrammeRepository;
 import sn.sysbudgep.elaboration.service.fonctionnementInvestissement.SaisieMajFctInvesService;
 
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.sql.Types;
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +98,7 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
     }
 
     @Override
-    public MontantAECPDto montantsAECPPROGRAMME(ParametreRechercheDTO pr)  {
+    public MontantAECPDto montantsAECPProgramme(ParametreRechercheDTO pr)  {
         MontantAECPDto dto = new MontantAECPDto();
 
         try {
@@ -162,7 +159,7 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
     }
 
     @Override
-    public List<LigneBudgetDto> ligneBudget(ParametreRechercheDTO pr) {
+    public List<LigneBudgetDto> lignesBudget(ParametreRechercheDTO pr) {
         return saisieMajFctInvesRepository.ligneBudget(pr.getExeCode(), pr.getChapId());
     }
 

@@ -27,14 +27,14 @@ public class saisieMajFoncInvessController {
     }
 
     // Montants AE/CP d'une programme d'enveloppe pour n1, n2 et n3
-    @PostMapping(value = "montantsAECPPROGRAMME")
+    @PostMapping(value = "montantsAECPProgramme")
     public MontantAECPDto montantsAECPPROGRAMME(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
-        return saisieMajFctInvesService.montantsAECPPROGRAMME(pr);
+        return saisieMajFctInvesService.montantsAECPProgramme(pr);
     }
 
     // Ligne budget
-    @PostMapping(value = "ligneBudget")
-    public List<LigneBudgetDto> ligneBudget(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
-        return saisieMajFctInvesService.ligneBudget(pr);
+    @PostMapping(value = "lignesBudget")
+    public List<LigneBudgetDto> lignesBudget(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
+        return saisieMajFctInvesService.lignesBudget(pr);
     }
 }

@@ -13,8 +13,8 @@ public interface SaisieMajFctInvesService {
     MontantAECPDto montantsAECPLigne(ParametreRechercheDTO pr) throws SQLException, ParseException;
 
     // Montants AE/CP d'une ligne d'enveloppe pour n1, n2 et n3
-    MontantAECPDto montantsAECPPROGRAMME(ParametreRechercheDTO pr) throws SQLException, ParseException;
+    MontantAECPDto montantsAECPProgramme(ParametreRechercheDTO pr) throws SQLException, ParseException;
 
     // Ligne budget
-    List<LigneBudgetDto> ligneBudget(ParametreRechercheDTO pr) throws SQLException, ParseException;
+    List<LigneBudgetDto> lignesBudget(ParametreRechercheDTO pr) throws SQLException, ParseException;
 }
