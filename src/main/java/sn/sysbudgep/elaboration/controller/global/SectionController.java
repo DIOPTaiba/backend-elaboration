@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/sections")
 //@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
 @CrossOrigin(origins = "*",maxAge = 3600)
-public class sectionController {
+public class SectionController {
 
     // liste sections
     @GetMapping(value = "/test")
