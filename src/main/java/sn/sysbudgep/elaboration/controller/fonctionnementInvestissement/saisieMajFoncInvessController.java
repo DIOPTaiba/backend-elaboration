@@ -5,6 +5,8 @@ import sn.sysbudgep.elaboration.service.fonctionnementInvestissement.SaisieMajFc
 
 @RestController
 @RequestMapping("/saisieMaj")
+//@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+@CrossOrigin(origins = "*",maxAge = 3600)
 public class saisieMajFoncInvessController {
 
     private final SaisieMajFctInvesService saisieMajFctInvesService;

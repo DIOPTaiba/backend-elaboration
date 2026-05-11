@@ -5,7 +5,7 @@ public interface SourceFinDto {
     String getSfinLib();
     Integer getSfinFoncactId();
     String getSfinValid();
-    Integer getSfinCodeNbe();
+    String getSfinCodeNbe();
     Integer getSfinTyprbId();
     String getSfinBailfCode();
     String getSfinTfinId();
