@@ -14,8 +14,10 @@ public interface Agents {
     BigDecimal getMontantPrisesChargeMedicales();
     BigDecimal getMontantContractuels();
     BigDecimal getMontantAutresChargesPersonnel();
-    String getAction();
-    String getActivite();
+    String getCodeAction();
+    String getLibAction();
+    String getCodeActivite();
+    String getLibActivite();
     String getChapitre();
     String getStatut();
     String getAge();
