@@ -18,6 +18,7 @@ public class ParametreRechercheDTO {
     private String typeFinCode="";
     private String sfinCode="";
     private String cadeCode="";
+    private String matricule="";
     @JsonFormat(pattern="dd/MM/yyyy")
     private String dateDebut="";
     @JsonFormat(pattern="dd/MM/yyyy")

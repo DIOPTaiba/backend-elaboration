@@ -1,0 +1,78 @@
+package sn.sysbudgep.elaboration.repository.global;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import sn.sysbudgep.elaboration.dto.global.Agents;
+import sn.sysbudgep.elaboration.entity.fonctionnementInvestissement.SaisieMajFctInves;
+
+import java.util.List;
+
+@Repository
+public interface AgentsRepository extends JpaRepository<SaisieMajFctInves, String> {
+
+    @Query(value = "SELECT\n" +
+            "    e.EMPAG_LIB AS emploi,\n" +
+            "    a.AFFAG_AGT_MAT AS matricule,\n" +
+            "    a.AFFAG_AGT_PRENOMS || ' ' || a.AFFAG_AGT_NOM AS nom,\n" +
+            "    SUM(CASE \n" +
+            "            WHEN SUBSTR(n.NAT_CODE,1,3) = '661'\n" +
+            "            THEN b.TRTAG_MONT\n" +
+            "            ELSE 0\n" +
+            "        END) AS \"montantTraitementsSalaires\",\n" +
+            "    SUM(CASE \n" +
+            "            WHEN SUBSTR(n.NAT_CODE,1,3) = '662'\n" +
+            "            THEN b.TRTAG_MONT\n" +
+            "            ELSE 0\n" +
+            "        END) AS \"montantPrimes\",\n" +
+            "    SUM(CASE \n" +
+            "            WHEN SUBSTR(n.NAT_CODE,1,3) = '663'\n" +
+            "            THEN b.TRTAG_MONT\n" +
+            "            ELSE 0\n" +
+            "        END) AS \"montantIndemnites\",\n" +
+            "    SUM(CASE \n" +
+            "            WHEN SUBSTR(n.NAT_CODE,1,3) = '665'\n" +
+            "            THEN b.TRTAG_MONT\n" +
+            "            ELSE 0\n" +
+            "        END) AS \"montantCotisationsSociales\",\n" +
+            "    SUM(CASE \n" +
+            "            WHEN SUBSTR(n.NAT_CODE,1,3) = '666'\n" +
+            "            THEN b.TRTAG_MONT\n" +
+            "            ELSE 0\n" +
+            "        END) AS \"montantPrestationsFamiliales\",\n" +
+            "    SUM(CASE \n" +
+            "            WHEN SUBSTR(n.NAT_CODE,1,3) = '667'\n" +
+            "            THEN b.TRTAG_MONT\n" +
+            "            ELSE 0\n" +
+            "        END) AS \"montantPrisesChargeMedicales\",\n" +
+            "    SUM(CASE \n" +
+            "            WHEN SUBSTR(n.NAT_CODE,1,3) = '668'\n" +
+            "            THEN b.TRTAG_MONT\n" +
+            "            ELSE 0\n" +
+            "        END) AS \"montantContractuels\",\n" +
+            "    SUM(CASE \n" +
+            "            WHEN SUBSTR(n.NAT_CODE,1,3) = '669'\n" +
+            "            THEN b.TRTAG_MONT\n" +
+            "            ELSE 0\n" +
+            "        END) AS \"montantAutresChargesPersonnel\"\n" +
+            "FROM vb3_affectation_agent a,\n" +
+            "     vb3_traitement_agent b,\n" +
+            "     vb3_emploi_agent e,\n" +
+            "     vb3_nature_eco n,\n" +
+            "     vb3_paragraphe p\n" +
+            "WHERE a.AFFAG_AGT_MAT = b.TRTAG_AGT_MAT\n" +
+            "AND a.AFFAG_EMPAG_ID = e.EMPAG_ID\n" +
+            "AND b.TRTAG_NAT_ID = n.NAT_ID\n" +
+            "AND SUBSTR(n.NAT_CODE,1,3) = p.PRG_CODE\n" +
+            "AND a.AFFAG_CHAP_ID =:chapId\n" +
+            "AND a.AFFAG_EXPB_CODE =:exeCode\n" +
+            "and b.TRTAG_AGT_MAT LIKE '%'||:matricule\n" +
+            "GROUP BY\n" +
+            "    e.EMPAG_LIB,\n" +
+            "    a.AFFAG_AGT_MAT,\n" +
+            "    a.AFFAG_AGT_PRENOMS || ' ' || a.AFFAG_AGT_NOM\n" +
+            "ORDER BY nom", nativeQuery = true)
+    List<Agents> agents(@Param("exeCode") String exeCode, @Param("chapId") String chapId, @Param("matricule") String matricule);
+
+}

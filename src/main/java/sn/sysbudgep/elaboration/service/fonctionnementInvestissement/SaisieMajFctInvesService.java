@@ -9,10 +9,10 @@ import java.text.ParseException;
 import java.util.List;
 
 public interface SaisieMajFctInvesService {
-    // Montants AE/CP d'une ligne d'enveloppe pour n1, n2 et n3
+    // Montants Total AE/CP d'une ligne d'enveloppe pour n1, n2 et n3
     MontantAECPDto montantsAECPLigne(ParametreRechercheDTO pr) throws SQLException, ParseException;
 
-    // Montants AE/CP d'une ligne d'enveloppe pour n1, n2 et n3
+    // Montants Réparti AE/CP d'un programme d'enveloppe pour n1, n2 et n3
     MontantAECPDto montantsAECPProgramme(ParametreRechercheDTO pr) throws SQLException, ParseException;
 
     // Ligne budget
