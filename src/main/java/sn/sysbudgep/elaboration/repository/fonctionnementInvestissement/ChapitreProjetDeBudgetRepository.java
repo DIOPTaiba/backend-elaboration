@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import sn.sysbudgep.elaboration.dto.fonctionnementInvestissement.saisieMajFonctInves.ChapitreProjetDeBudgetDto;
+import sn.sysbudgep.elaboration.dto.global.ChapitreDto;
 import sn.sysbudgep.elaboration.entity.fonctionnementInvestissement.SaisieMajFctInves;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public interface ChapitreProjetDeBudgetRepository extends JpaRepository<SaisieMa
             "AND (chap_code_ptip IS NOT NULL OR :proCode LIKE '3%') " +
             "GROUP BY chap_id, chap_code, chap_lib " +
             "ORDER BY chap_code", nativeQuery = true)
-    List<ChapitreProjetDeBudgetDto> findChapitresInvestissement(
+    List<ChapitreDto> findChapitresInvestissement(
             @Param("secId") String secId,
             @Param("sfinCode") String sfinCode,
             @Param("proId") String proId,
@@ -45,7 +45,7 @@ public interface ChapitreProjetDeBudgetRepository extends JpaRepository<SaisieMa
             "AND chap_code_ptip IS NULL " +
             "GROUP BY chap_id, chap_code, chap_lib " +
             "ORDER BY chap_code", nativeQuery = true)
-    List<ChapitreProjetDeBudgetDto> findChapitreFonctionnement(
+    List<ChapitreDto> findChapitreFonctionnement(
             @Param("secId") String secId,
             @Param("sfinCode") String sfinCode,
             @Param("proId") String proId

@@ -4,7 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import sn.sysbudgep.elaboration.dto.fonctionnementInvestissement.saisieMajFonctInves.ActionProjetDeBudgetDto;
+
+import sn.sysbudgep.elaboration.dto.global.ActionDto;
 import sn.sysbudgep.elaboration.entity.fonctionnementInvestissement.SaisieMajFctInves;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public interface ActionProjetDeBudgetRepository extends JpaRepository<SaisieMajF
             "    WHERE COPC_CHAP_ID = :chapId " +
             ") " +
             "ORDER BY b.cop_code", nativeQuery = true)
-    List<ActionProjetDeBudgetDto> findActionsProjetDeBudget(
+    List<ActionDto> findActionsProjetDeBudget(
             @Param("proId") String proId,
             @Param("pappRef") String pappRef,
             @Param("chapCode") String chapCode,
