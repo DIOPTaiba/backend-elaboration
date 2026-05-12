@@ -17,7 +17,7 @@ public interface ChapitreProjetDeBudgetRepository extends JpaRepository<SaisieMa
             "FROM vb3_chapitre " +
             "JOIN vb3_ligne_budget_comp_lfi c ON chap_id = c.lbuc_chap_id " +
             "WHERE chap_sec_id_leb = :secId " +
-            "AND c.lbuc_sfin_code = :sfinCode " +
+            "AND (:sfinCode IS NULL OR c.lbuc_sfin_code = :sfinCode) " +
             "AND chap_id IN ( " +
             "    SELECT PC_CHAP_ID FROM vb3_prog_chapitre " +
             "    WHERE PC_PRO_ID = :proId AND PC_VALIDE = 'O' " +
@@ -37,7 +37,7 @@ public interface ChapitreProjetDeBudgetRepository extends JpaRepository<SaisieMa
             "FROM vb3_chapitre " +
             "JOIN vb3_ligne_budget_comp_lfi c ON chap_id = c.lbuc_chap_id " +
             "WHERE chap_sec_id_leb = :secId " +
-            "AND c.lbuc_sfin_code = :sfinCode " +
+            "AND (:sfinCode IS NULL OR c.lbuc_sfin_code = :sfinCode)" +
             "AND chap_id IN ( " +
             "    SELECT PC_CHAP_ID FROM vb3_prog_chapitre " +
             "    WHERE PC_PRO_ID = :proId AND PC_VALIDE = 'O' " +
