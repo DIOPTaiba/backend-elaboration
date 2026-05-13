@@ -2,6 +2,7 @@ package sn.sysbudgep.elaboration.service.fonctionnementInvestissement;
 
 import sn.sysbudgep.elaboration.dto.classe.MontantAECPDto;
 import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
+import sn.sysbudgep.elaboration.dto.classe.ResponseDto;
 import sn.sysbudgep.elaboration.dto.global.LigneBudgetDto;
 
 import java.sql.SQLException;
@@ -17,4 +18,10 @@ public interface SaisieMajFctInvesService {
 
     // Ligne budget
     List<LigneBudgetDto> lignesBudget(ParametreRechercheDTO pr) throws SQLException, ParseException;
+
+    // Insertion ligne budgétaire
+    ResponseDto insertLigneBudget(ParametreRechercheDTO pr) throws SQLException, ParseException;
+
+    // Update ligne budgétaire
+    ResponseDto updateLigneBudget(ParametreRechercheDTO pr) throws SQLException, ParseException;
 }

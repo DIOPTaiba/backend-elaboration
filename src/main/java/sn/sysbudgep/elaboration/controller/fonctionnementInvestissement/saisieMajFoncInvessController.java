@@ -3,6 +3,7 @@ package sn.sysbudgep.elaboration.controller.fonctionnementInvestissement;
 import org.springframework.web.bind.annotation.*;
 import sn.sysbudgep.elaboration.dto.classe.MontantAECPDto;
 import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
+import sn.sysbudgep.elaboration.dto.classe.ResponseDto;
 import sn.sysbudgep.elaboration.dto.global.LigneBudgetDto;
 import sn.sysbudgep.elaboration.service.fonctionnementInvestissement.SaisieMajFctInvesService;
 
@@ -38,5 +39,17 @@ public class saisieMajFoncInvessController {
     @PostMapping(value = "lignesBudget")
     public List<LigneBudgetDto> lignesBudget(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
         return saisieMajFctInvesService.lignesBudget(pr);
+    }
+
+    // Insert Ligne budget
+    @PostMapping(value = "insertLigneBudget")
+    public ResponseDto insertLigneBudget(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
+        return saisieMajFctInvesService.insertLigneBudget(pr);
+    }
+
+    // Update Ligne budget
+    @PostMapping(value = "updateLigneBudget")
+    public ResponseDto updateLigneBudget(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
+        return saisieMajFctInvesService.updateLigneBudget(pr);
     }
 }
