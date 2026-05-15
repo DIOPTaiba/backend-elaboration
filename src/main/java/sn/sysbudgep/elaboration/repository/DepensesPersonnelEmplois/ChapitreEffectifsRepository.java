@@ -15,90 +15,89 @@ public interface ChapitreEffectifsRepository extends JpaRepository<SaisieMajFctI
 
     @Query(value = "SELECT \n" +
             "    t.AFFAG_CHAP_ID chapId,\n" +
-            "    c.CHAP_CODE chapCode,\n" +
-            "    c.CHAP_LIB chapLib, t.statut,\n" +
+            "    c.CHAP_CODE chapCode, c.CHAP_LIB chapLib, t.statut,\n" +
             "    SUM(NVL(t.effectif_prec,0)) effectif0,\n" +
-            "    SUM(NVL(t.effectif,0)) effectif1,\n" +
-            "    SUM(t.montant) montant\n" +
+            "    SUM(NVL(t.nombreAgent,0)) nombreAgent,\n" +
+            "    SUM(NVL(t.nombreContractuel,0)) nombreContractuel,\n" +
+            "    SUM(NVL(t.montant,0)) montant\n" +
             "FROM (\n" +
-            "    select a.AFFAG_CHAP_ID,\n" +
-            "           decode(a.AFFAG_AGT_CATEG,'FP','Agent solde','Contractuel') statut,\n" +
-            "           0 effectif_prec,\n" +
-            "           count(*) effectif, 0 montant\n" +
-            "    from vb3_affectation_agent a\n" +
-            "    where a.AFFAG_AGT_CATEG NOT IN ('FP') \n" +
-            "    and a.AFFAG_EXPB_CODE=:exeCode1\n" +
-            "    and a.AFFAG_PRO_ID =:proId\n" +
-            "    group by a.AFFAG_CHAP_ID,\n" +
-            "             decode(a.AFFAG_AGT_CATEG,'FP','Agent solde','Contractuel')\n" +
-            "    union\n" +
-            "    select a.AFFAG_CHAP_ID,\n" +
-            "           decode(a.AFFAG_AGT_CATEG,'FP','Agent solde','Contractuel') statut,\n" +
-            "           count(*) effectif_prec,\n" +
-            "           0 effectif, 0 montant\n" +
-            "    from vb3_hist_affectation_agent a\n" +
-            "    where a.AFFAG_AGT_CATEG NOT IN ('FP') \n" +
-            "    and a.AFFAG_EXPB_CODE=:exeCode\n" +
-            "    and a.AFFAG_PRO_ID =:proId\n" +
-            "    group by a.AFFAG_CHAP_ID,\n" +
-            "             decode(a.AFFAG_AGT_CATEG,'FP','Agent solde','Contractuel')\n" +
-            "    union\n" +
-            "    select a.AFFAG_CHAP_ID,\n" +
-            "           decode(a.AFFAG_AGT_CATEG,'FP','Agent solde','Contractuel') statut,\n" +
-            "           0 effectif_prec, 0 effectif,\n" +
-            "           sum(b.TRTAG_MONT) montant\n" +
-            "    from vb3_affectation_agent a,\n" +
-            "         vb3_traitement_agent b \n" +
-            "    where a.AFFAG_AGT_MAT=b.TRTAG_AGT_MAT\n" +
-            "    and a.AFFAG_AGT_CATEG NOT IN ('FP') \n" +
-            "    and a.AFFAG_EXPB_CODE=:exeCode1\n" +
-            "    and a.AFFAG_PRO_ID =:proId\n" +
-            "    group by a.AFFAG_CHAP_ID,\n" +
-            "             decode(a.AFFAG_AGT_CATEG,'FP','Agent solde','Contractuel')\n" +
-            "    union\n" +
-            "    select a.AFFAG_CHAP_ID,\n" +
-            "           decode(a.AFFAG_AGT_CATEG,'FP','Agent solde','Contractuel') statut,\n" +
-            "           0 effectif_prec, 0 effectif,\n" +
-            "           sum(b.TRTAG_MONT) montant\n" +
-            "    from vb3_affectation_agent a,\n" +
-            "         vb3_traitement_agent b \n" +
-            "    where a.AFFAG_AGT_MAT=b.TRTAG_AGT_MAT\n" +
-            "    and a.AFFAG_AGT_CATEG IN ('FP') \n" +
-            "    and a.AFFAG_EXPB_CODE=:exeCode1\n" +
-            "    and a.AFFAG_PRO_ID =:proId\n" +
-            "    group by a.AFFAG_CHAP_ID,\n" +
-            "             decode(a.AFFAG_AGT_CATEG,'FP','Agent solde','Contractuel')\n" +
-            "    union\n" +
-            "    select a.AFFAG_CHAP_ID,\n" +
-            "           decode(a.AFFAG_AGT_CATEG,'FP','Agent solde','Contractuel') statut,\n" +
-            "           0 effectif_prec,\n" +
-            "           count(*) effectif, 0 montant\n" +
-            "    from vb3_affectation_agent a\n" +
-            "    where a.AFFAG_AGT_CATEG IN ('FP') \n" +
-            "    and a.AFFAG_EXPB_CODE=:exeCode1\n" +
-            "    and a.AFFAG_PRO_ID =:proId\n" +
-            "    group by a.AFFAG_CHAP_ID,\n" +
-            "             decode(a.AFFAG_AGT_CATEG,'FP','Agent solde','Contractuel')\n" +
-            "    union\n" +
-            "    select a.AFFAG_CHAP_ID,\n" +
-            "           decode(a.AFFAG_AGT_CATEG,'FP','Agent solde','Contractuel') statut,\n" +
-            "           count(*) effectif_prec,\n" +
-            "           0 effectif, 0 montant\n" +
-            "    from vb3_hist_affectation_agent a\n" +
-            "    where a.AFFAG_AGT_CATEG IN ('FP') \n" +
-            "    and a.AFFAG_EXPB_CODE=:exeCode\n" +
-            "    and a.AFFAG_PRO_ID =:proId\n" +
-            "    group by a.AFFAG_CHAP_ID,\n" +
-            "    decode(a.AFFAG_AGT_CATEG,'FP','Agent solde','Contractuel')\n" +
+            "    /* Effectif année courante */\n" +
+            "    SELECT \n" +
+            "        a.AFFAG_CHAP_ID,\n" +
+            "        CASE \n" +
+            "            WHEN a.AFFAG_AGT_CATEG = 'FP'\n" +
+            "            THEN 'Agent solde'\n" +
+            "            ELSE 'Contractuel'\n" +
+            "        END statut,\n" +
+            "        0 effectif_prec,\n" +
+            "        COUNT(*) nombreAgent,\n" +
+            "        SUM(CASE \n" +
+            "                WHEN a.AFFAG_AGT_CATEG <> 'FP'\n" +
+            "                THEN 1\n" +
+            "                ELSE 0\n" +
+            "            END) nombreContractuel, 0 montant\n" +
+            "    FROM vb3_affectation_agent a\n" +
+            "    WHERE a.AFFAG_EXPB_CODE=:exeCode1\n" +
+            "    AND a.AFFAG_PRO_ID =:proId\n" +
+            "    GROUP BY \n" +
+            "        a.AFFAG_CHAP_ID,\n" +
+            "        CASE \n" +
+            "            WHEN a.AFFAG_AGT_CATEG = 'FP'\n" +
+            "            THEN 'Agent solde'\n" +
+            "            ELSE 'Contractuel'\n" +
+            "        END\n" +
+            "    UNION ALL\n" +
+            "    /* Effectif année précédente */\n" +
+            "    SELECT \n" +
+            "        a.AFFAG_CHAP_ID,\n" +
+            "        CASE \n" +
+            "            WHEN a.AFFAG_AGT_CATEG = 'FP'\n" +
+            "            THEN 'Agent solde'\n" +
+            "            ELSE 'Contractuel'\n" +
+            "        END statut,\n" +
+            "        COUNT(*) effectif_prec, 0 nombreAgent,\n" +
+            "        0 nombreContractuel, 0 montant\n" +
+            "    FROM vb3_hist_affectation_agent a\n" +
+            "    WHERE a.AFFAG_EXPB_CODE=:exeCode\n" +
+            "    AND a.AFFAG_PRO_ID =:proId\n" +
+            "    GROUP BY \n" +
+            "        a.AFFAG_CHAP_ID,\n" +
+            "        CASE \n" +
+            "            WHEN a.AFFAG_AGT_CATEG = 'FP'\n" +
+            "            THEN 'Agent solde'\n" +
+            "            ELSE 'Contractuel'\n" +
+            "        END\n" +
+            "    UNION ALL\n" +
+            "    /* Montants */\n" +
+            "    SELECT \n" +
+            "        a.AFFAG_CHAP_ID,\n" +
+            "        CASE \n" +
+            "            WHEN a.AFFAG_AGT_CATEG = 'FP'\n" +
+            "            THEN 'Agent solde'\n" +
+            "            ELSE 'Contractuel'\n" +
+            "        END statut, 0 effectif_prec,\n" +
+            "        0 nombreAgent, 0 nombreContractuel,\n" +
+            "        SUM(b.TRTAG_MONT) montant\n" +
+            "    FROM vb3_affectation_agent a\n" +
+            "    JOIN vb3_traitement_agent b\n" +
+            "        ON a.AFFAG_AGT_MAT = b.TRTAG_AGT_MAT\n" +
+            "    WHERE a.AFFAG_EXPB_CODE=:exeCode1\n" +
+            "    AND a.AFFAG_PRO_ID =:proId\n" +
+            "    GROUP BY \n" +
+            "        a.AFFAG_CHAP_ID,\n" +
+            "        CASE \n" +
+            "            WHEN a.AFFAG_AGT_CATEG = 'FP'\n" +
+            "            THEN 'Agent solde'\n" +
+            "            ELSE 'Contractuel'\n" +
+            "        END\n" +
             ") t\n" +
             "INNER JOIN VB3_CHAPITRE c\n" +
             "    ON t.AFFAG_CHAP_ID = c.CHAP_ID\n" +
             "GROUP BY \n" +
             "    t.AFFAG_CHAP_ID, c.CHAP_CODE,\n" +
-            "    c.CHAP_LIB, t.statut\n" +
+            "    c.CHAP_LIB,  t.statut\n" +
             "ORDER BY \n" +
-            "    c.CHAP_CODE,\n" +
-            "    t.statut", nativeQuery = true)
+            "    c.CHAP_CODE, t.statut", nativeQuery = true)
     List<ChapitreEffectifsDto> chapitreEffectifs(@Param("exeCode") String exeCode, @Param("exeCode1") String exeCode1, @Param("proId") String proId);
 
 }

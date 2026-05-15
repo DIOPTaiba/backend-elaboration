@@ -8,6 +8,7 @@ public interface ChapitreEffectifsDto {
     String getChapLib();
     String getStatut();
     int getEffectif0();
-    int getEffectif1();
+    int getNombreAgent();
+    int getNombreContractuel();
     BigDecimal getMontant();
 }
