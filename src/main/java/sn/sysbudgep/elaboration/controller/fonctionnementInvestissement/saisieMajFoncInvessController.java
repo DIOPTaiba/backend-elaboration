@@ -4,6 +4,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.web.bind.annotation.*;
 import sn.sysbudgep.elaboration.dto.classe.MontantAECPDto;
 import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
+import sn.sysbudgep.elaboration.dto.global.ActiviteDto;
 import sn.sysbudgep.elaboration.dto.classe.ResponseDto;
 import sn.sysbudgep.elaboration.dto.global.LigneBudgetDto;
 import sn.sysbudgep.elaboration.service.fonctionnementInvestissement.SaisieMajFctInvesService;
@@ -42,6 +43,17 @@ public class saisieMajFoncInvessController {
         return saisieMajFctInvesService.lignesBudget(pr);
     }
 
+    // Liste des activités pour la saisie
+    @PostMapping(value = "listeActiviteSaisie")
+    public List<ActiviteDto> listeActiviteSaisie(@RequestBody ParametreRechercheDTO pr) {
+        return saisieMajFctInvesService.listeActiviteSaisie(pr);
+    }
+
+    // Lignes disponibles pour la saisie
+    @PostMapping(value = "ligneSaisie")
+    public List<LigneBudgetDto> ligneSaisie(@RequestBody ParametreRechercheDTO pr) {
+        return saisieMajFctInvesService.ligneSaisie(pr);
+    }
     // Insert Ligne budget
     @PostMapping(value = "insertLigneBudget")
     public ResponseDto insertLigneBudget(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {

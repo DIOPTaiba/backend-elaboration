@@ -17,12 +17,12 @@ public class ChapitreProjetDeBudgetServiceImpl implements ChapitreProjetDeBudget
     }
 
     @Override
-    public List<ChapitreDto> getChapitresInvestissement(String secId, String sfinCode, String proId, String proCode) {
-        return chapitreProjetDeBudgetRepository.findChapitresInvestissement(secId, sfinCode, proId, proCode);
+    public List<ChapitreDto> getChapitresInvestissement(String secId, String sfinCode, String proId, String proCode,String exeCode) {
+        return chapitreProjetDeBudgetRepository.findChapitresInvestissement(secId, sfinCode, proId, proCode,exeCode);
     }
 
     @Override
-    public List<ChapitreDto> getChapitreFonctionnement(String secId, String sfinCode, String proId) {
-        return chapitreProjetDeBudgetRepository.findChapitreFonctionnement(secId, sfinCode, proId);
+    public List<ChapitreDto> getChapitreFonctionnement(String secId, String sfinCode, String proId,String exeCode) {
+        return chapitreProjetDeBudgetRepository.findChapitreFonctionnement(secId, sfinCode, proId,exeCode);
     }
 }

@@ -24,6 +24,7 @@ public class ParametreRechercheDTO {
     private String sfinCode="";
     private String sfinCodeNew="";
     private String cadeCode="";
+    private String budcCode="";
     private String natId="";
     private Integer natIdNumber;
     private String natCode="";
@@ -32,8 +33,6 @@ public class ParametreRechercheDTO {
     private String dateDebut="";
     @JsonFormat(pattern="dd/MM/yyyy")
     private String dateFin="";
-
-    private String budcCode="";
     private int bailfCode;
     private BigDecimal cp1Prec;
     private BigDecimal cp1;

@@ -7,4 +7,8 @@ public interface ActiviteDto {
     String getCopNipCode();
     String getBudcCode();
     String getBudcStatCod();
+    String getCodeAction();
+    String getLibAction();
+    String getCodeActivite();
+    String getLibActivite();
 }

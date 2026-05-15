@@ -16,7 +16,7 @@ public interface ChapitreProjetDeBudgetRepository extends JpaRepository<SaisieMa
             "SUM(c.lbuc_ae_1) AS ae, SUM(c.lbuc_cp_1) AS cp " +
             "FROM vb3_chapitre " +
             "JOIN vb3_ligne_budget_comp_lfi c ON chap_id = c.lbuc_chap_id " +
-            "WHERE chap_sec_id_leb = :secId " +
+            "WHERE chap_sec_id_leb = :secId and c.lbuc_expb_code=:exeCode " +
             "AND (:sfinCode IS NULL OR c.lbuc_sfin_code = :sfinCode) " +
             "AND chap_id IN ( " +
             "    SELECT PC_CHAP_ID FROM vb3_prog_chapitre " +
@@ -29,14 +29,15 @@ public interface ChapitreProjetDeBudgetRepository extends JpaRepository<SaisieMa
             @Param("secId") String secId,
             @Param("sfinCode") String sfinCode,
             @Param("proId") String proId,
-            @Param("proCode") String proCode
+            @Param("proCode") String proCode,
+            @Param("exeCode") String exeCode
     );
 
     @Query(value = "SELECT chap_id AS chapId, chap_code AS chapCode, chap_lib AS chapLib, " +
             "SUM(c.lbuc_ae_1) AS ae, SUM(c.lbuc_cp_1) AS cp " +
             "FROM vb3_chapitre " +
             "JOIN vb3_ligne_budget_comp_lfi c ON chap_id = c.lbuc_chap_id " +
-            "WHERE chap_sec_id_leb = :secId " +
+            "WHERE chap_sec_id_leb = :secId and c.lbuc_expb_code=:exeCode " +
             "AND (:sfinCode IS NULL OR c.lbuc_sfin_code = :sfinCode)" +
             "AND chap_id IN ( " +
             "    SELECT PC_CHAP_ID FROM vb3_prog_chapitre " +
@@ -48,6 +49,7 @@ public interface ChapitreProjetDeBudgetRepository extends JpaRepository<SaisieMa
     List<ChapitreDto> findChapitreFonctionnement(
             @Param("secId") String secId,
             @Param("sfinCode") String sfinCode,
-            @Param("proId") String proId
+            @Param("proId") String proId,
+            @Param("exeCode") String exeCode
     );
 }

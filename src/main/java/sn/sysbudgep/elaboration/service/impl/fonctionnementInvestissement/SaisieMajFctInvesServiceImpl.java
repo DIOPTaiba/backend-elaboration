@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Service;
 import sn.sysbudgep.elaboration.dto.classe.MontantAECPDto;
 import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
+import sn.sysbudgep.elaboration.dto.global.ActiviteDto;
 import sn.sysbudgep.elaboration.dto.classe.ResponseDto;
 import sn.sysbudgep.elaboration.dto.global.LigneBudgetDto;
 import sn.sysbudgep.elaboration.repository.fonctionnementInvestissement.SaisieMajFctInvesRepository;
@@ -165,6 +166,15 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
         return saisieMajFctInvesRepository.ligneBudget(pr.getExeCode(), pr.getChapId());
     }
 
+    @Override
+    public List<ActiviteDto> listeActiviteSaisie(ParametreRechercheDTO pr) {
+        return saisieMajFctInvesRepository.listeActiviteSaisie(pr.getExeCode(), pr.getChapId());
+    }
+
+    @Override
+    public List<LigneBudgetDto> ligneSaisie(ParametreRechercheDTO pr) {
+        return saisieMajFctInvesRepository.ligneSaisie(pr.getCadeCode(), pr.getBudcCode(), pr.getChapId(), pr.getSfinCode());
+    }
     @Override
     public ResponseDto insertLigneBudget(ParametreRechercheDTO pr) throws SQLException, ParseException {
         ResponseDto dto = new ResponseDto();
