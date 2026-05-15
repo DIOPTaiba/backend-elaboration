@@ -11,12 +11,15 @@ import org.springframework.stereotype.Service;
 import sn.sysbudgep.elaboration.dto.classe.MontantAECPDto;
 import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
 import sn.sysbudgep.elaboration.dto.global.ActiviteDto;
+import sn.sysbudgep.elaboration.dto.classe.ResponseDto;
 import sn.sysbudgep.elaboration.dto.global.LigneBudgetDto;
 import sn.sysbudgep.elaboration.repository.fonctionnementInvestissement.SaisieMajFctInvesRepository;
 import sn.sysbudgep.elaboration.service.fonctionnementInvestissement.SaisieMajFctInvesService;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.sql.Types;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,12 +92,11 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
             dto.setMontantN3AE(getBigDecimal(result, "p_mont_n3_ae"));
 
         } catch (DataAccessException e) {
-            logger.error("Erreur base de données procédure p_mont_env", e);
+            logger.error("Erreur base de données procédure PK3_LIGNE_ENVELOPPE_PROG.p_mont_env()", e);
             throw new RuntimeException(
                     "Erreur récupération montants AE/CP", e
             );
         }
-
         return dto;
     }
 
@@ -150,7 +152,7 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
             dto.setMontantN3AE(getBigDecimal(result, "p_mont_n3_ae"));
 
         } catch (DataAccessException e) {
-            logger.error("Erreur base de données procédure p_mont_env", e);
+            logger.error("Erreur base de données procédure PK3_PAP_PROGRAMME.p_credits_saisie()", e);
             throw new RuntimeException(
                     "Erreur récupération montants AE/CP", e
             );
@@ -173,10 +175,132 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
     public List<LigneBudgetDto> ligneSaisie(ParametreRechercheDTO pr) {
         return saisieMajFctInvesRepository.ligneSaisie(pr.getCadeCode(), pr.getBudcCode(), pr.getChapId(), pr.getSfinCode());
     }
+    @Override
+    public ResponseDto insertLigneBudget(ParametreRechercheDTO pr) throws SQLException, ParseException {
+        ResponseDto dto = new ResponseDto();
+        try {
+            SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate)
+                    .withCatalogName("PK4ELAB_LIGNE_BUDGET_COMP")
+                    .withProcedureName("p_insertion")
+                    // si plusieurs procédures avec même nom dans la BD oracle
+                    .withoutProcedureColumnMetaDataAccess()
+                    .declareParameters(
+                            new SqlOutParameter("P_BUC_CODE", Types.VARCHAR),
+                            new SqlParameter("P_LBUC_SEC_ID", Types.VARCHAR),
+                            new SqlParameter("P_LBUC_BUDC_CODE", Types.VARCHAR),
+                            new SqlParameter("P_LBUC_CHAP_ID", Types.VARCHAR),
+                            new SqlParameter("P_LBUC_NAT_ID", Types.NUMERIC),
+                            new SqlParameter("P_LBUC_CADE_CODE", Types.VARCHAR),
+                            new SqlParameter("P_LBUC_SFIN_CODE", Types.VARCHAR),
+                            new SqlParameter("P_LBUC_SFIN_CODE_NEW", Types.VARCHAR),
+                            new SqlParameter("P_LBUC_BAILF_CODE", Types.NUMERIC),
+                            new SqlParameter("P_LBUC_CP_1_PREC", Types.NUMERIC),
+                            new SqlParameter("P_LBUC_CP_1", Types.NUMERIC),
+                            new SqlParameter("P_LBUC_AE_ANT", Types.NUMERIC),
+                            new SqlParameter("P_LBUC_AE_1_PREC", Types.NUMERIC),
+                            new SqlParameter("P_LBUC_AE_1", Types.NUMERIC),
+                            new SqlParameter("P_LBUC_FONCACT_ID", Types.VARCHAR),
+                            new SqlOutParameter("p_etat", Types.NUMERIC),
+                            new SqlOutParameter("p_erreur", Types.VARCHAR)
+                    );
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("P_LBUC_SEC_ID", pr.getSectionId());
+            params.put("P_LBUC_BUDC_CODE", pr.getBudcCode());
+            params.put("P_LBUC_CHAP_ID", pr.getChapId());
+            params.put("P_LBUC_NAT_ID", pr.getNatIdNumber());
+            params.put("P_LBUC_CADE_CODE", pr.getCadeCode());
+            params.put("P_LBUC_SFIN_CODE", pr.getSfinCode());
+            params.put("P_LBUC_SFIN_CODE_NEW", pr.getSfinCodeNew());
+            params.put("P_LBUC_BAILF_CODE", pr.getBailfCode());
+            params.put("P_LBUC_CP_1_PREC", pr.getCp1Prec());
+            params.put("P_LBUC_CP_1", pr.getCp1());
+            params.put("P_LBUC_AE_ANT", pr.getAeAnt());
+            params.put("P_LBUC_AE_1_PREC", pr.getAe1Prec());
+            params.put("P_LBUC_AE_1", pr.getAe1());
+            params.put("P_LBUC_FONCACT_ID", pr.getFoncatId());
+
+            Map<String, Object> result = call.execute(params);
+
+            // =====================
+            // MAPPING
+            // =====================
+            dto.setNumero(getString(result,"P_BUC_CODE"));
+            dto.setEtat(getInteger(result, "p_etat"));
+            dto.setMessageErreur(getString(result, "p_erreur"));
+
+        } catch (DataAccessException e) {
+            logger.error("Erreur base de données procédure PK4ELAB_LIGNE_BUDGET_COMP.p_insertion", e);
+            throw new RuntimeException(
+                    "Erreur récupération résultat", e
+            );
+        }
+
+        return dto;
+    }
+
+    @Override
+    public ResponseDto updateLigneBudget(String lbucCode, ParametreRechercheDTO pr) throws SQLException, ParseException {
+        ResponseDto dto = new ResponseDto();
+        try {
+            SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate)
+                    .withCatalogName("PK4ELAB_LIGNE_BUDGET_COMP")
+                    .withProcedureName("p_update")
+                    // si plusieurs procédures avec même nom dans la BD oracle
+                    .withoutProcedureColumnMetaDataAccess()
+                    .declareParameters(
+                            new SqlParameter("P_LBUC_CODE", Types.VARCHAR),
+                            new SqlParameter("P_LBUC_CP_1", Types.NUMERIC),
+                            new SqlParameter("P_LBUC_AE_1", Types.NUMERIC),
+                            new SqlParameter("P_LBUC_CP_MN", Types.NUMERIC),
+                            new SqlParameter("P_LBUC_AE_MN", Types.NUMERIC),
+                            new SqlParameter("P_LBUC_FONCACT_ID", Types.VARCHAR),
+                            new SqlOutParameter("p_etat", Types.NUMERIC),
+                            new SqlOutParameter("p_erreur", Types.VARCHAR)
+                    );
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("P_LBUC_CODE", lbucCode);
+            params.put("P_LBUC_CP_1", pr.getCp1());
+            params.put("P_LBUC_AE_1", pr.getAe1());
+            params.put("P_LBUC_CP_MN", pr.getCpMn());
+            params.put("P_LBUC_AE_MN", pr.getAeMn());
+            params.put("P_LBUC_FONCACT_ID", pr.getFoncatId());
+
+            Map<String, Object> result = call.execute(params);
+
+            // =====================
+            // MAPPING
+            // =====================
+            dto.setEtat(getInteger(result, "p_etat"));
+            dto.setMessageErreur(getString(result, "p_erreur"));
+
+        } catch (DataAccessException e) {
+            logger.error("Erreur base de données procédure PK4ELAB_LIGNE_BUDGET_COMP.p_update", e);
+            throw new RuntimeException(
+                    "Erreur récupération résultat", e
+            );
+        }
+
+        return dto;
+    }
 
     // pour gérer les null
     private BigDecimal getBigDecimal(Map<String, Object> result, String key) {
         return Optional.ofNullable((BigDecimal) result.get(key))
                 .orElse(BigDecimal.ZERO);
+    }
+
+    private String getString(Map<String, Object> result, String key) {
+        return Optional.ofNullable((String) result.get(key))
+                .orElse("");
+    }
+
+    private Integer getInteger(Map<String, Object> result, String key) {
+        Object value = result.get(key);
+        if (value == null) {
+            return 0;
+        }
+        return ((Number) value).intValue();
     }
 }

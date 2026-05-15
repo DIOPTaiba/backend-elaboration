@@ -20,7 +20,7 @@ public interface ActiviteProjetDeBudgetRepository extends JpaRepository<SaisieMa
             "AND BUDC_PAPP_REF = :pappRef " +
             "AND cop_pptip_id = DECODE(SUBSTR(:chapCode, 1, 2), '39', 'O', 'N') " +
             "ORDER BY cop_code", nativeQuery = true)
-    List<ActiviteDto> findActivitesProjetDeBudget(
+List<ActiviteDto> findActivitesProjetDeBudget(
             @Param("copCopId") String copCopId,
             @Param("pappRef") String pappRef,
             @Param("chapCode") String chapCode
