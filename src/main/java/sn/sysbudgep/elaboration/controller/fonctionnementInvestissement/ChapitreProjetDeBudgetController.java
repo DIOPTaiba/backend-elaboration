@@ -18,20 +18,23 @@ public class ChapitreProjetDeBudgetController {
         this.chapitreProjetDeBudgetService = chapitreProjetDeBudgetService;
     }
 
-    @GetMapping("/chapitresInvestissement/{secId}/{sfinCode}/{proId}/{proCode}")
+    @GetMapping("/chapitresInvestissement/{secId}/{sfinCode}/{proId}/{proCode}/{exeCode}")
     public ResponseEntity<List<ChapitreDto>> getChapitresInvestissement(
             @PathVariable String secId,
             @PathVariable String sfinCode,
             @PathVariable String proId,
-            @PathVariable String proCode) {
-        return ResponseEntity.ok(chapitreProjetDeBudgetService.getChapitresInvestissement(secId, sfinCode, proId, proCode));
+            @PathVariable String proCode,
+            @PathVariable String exeCode
+            ) {
+        return ResponseEntity.ok(chapitreProjetDeBudgetService.getChapitresInvestissement(secId, sfinCode, proId, proCode,exeCode));
     }
 
-    @GetMapping("/chapitresFonctionnement/{secId}/{sfinCode}/{proId}")
+    @GetMapping("/chapitresFonctionnement/{secId}/{sfinCode}/{proId}/{exeCode}")
     public ResponseEntity<List<ChapitreDto>> getChapitreFonctionnement(
             @PathVariable String secId,
             @PathVariable String sfinCode,
-            @PathVariable String proId) {
-        return ResponseEntity.ok(chapitreProjetDeBudgetService.getChapitreFonctionnement(secId, sfinCode, proId));
+            @PathVariable String proId,
+            @PathVariable String exeCode) {
+        return ResponseEntity.ok(chapitreProjetDeBudgetService.getChapitreFonctionnement(secId, sfinCode, proId, exeCode));
     }
 }

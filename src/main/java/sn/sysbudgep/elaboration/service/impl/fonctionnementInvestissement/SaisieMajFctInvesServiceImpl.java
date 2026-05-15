@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Service;
 import sn.sysbudgep.elaboration.dto.classe.MontantAECPDto;
 import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
+import sn.sysbudgep.elaboration.dto.global.ActiviteDto;
 import sn.sysbudgep.elaboration.dto.global.LigneBudgetDto;
 import sn.sysbudgep.elaboration.repository.fonctionnementInvestissement.SaisieMajFctInvesRepository;
 import sn.sysbudgep.elaboration.service.fonctionnementInvestissement.SaisieMajFctInvesService;
@@ -161,6 +162,16 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
     @Override
     public List<LigneBudgetDto> lignesBudget(ParametreRechercheDTO pr) {
         return saisieMajFctInvesRepository.ligneBudget(pr.getExeCode(), pr.getChapId());
+    }
+
+    @Override
+    public List<ActiviteDto> listeActiviteSaisie(ParametreRechercheDTO pr) {
+        return saisieMajFctInvesRepository.listeActiviteSaisie(pr.getExeCode(), pr.getChapId());
+    }
+
+    @Override
+    public List<LigneBudgetDto> ligneSaisie(ParametreRechercheDTO pr) {
+        return saisieMajFctInvesRepository.ligneSaisie(pr.getCadeCode(), pr.getBudcCode(), pr.getChapId(), pr.getSfinCode());
     }
 
     // pour gérer les null

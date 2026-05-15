@@ -1,7 +1,7 @@
 package sn.sysbudgep.elaboration.dto.global;
 
 public interface ProgrammeDto {
-    Integer getProId();
+    String getProId();
     String getProCode();
     String getProLibelle();
     String getPappRef();

@@ -13,4 +13,5 @@ public interface LigneBudgetDto {
     String getLibActivite();
     String getCodeLigne();
     String getLibLigne();
+    String getIdLigne();
 }

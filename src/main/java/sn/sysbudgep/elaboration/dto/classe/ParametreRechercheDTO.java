@@ -99,6 +99,14 @@ public class ParametreRechercheDTO {
         this.cadeCode = cadeCode;
     }
 
+    public String getBudcCode() {
+        return budcCode;
+    }
+
+    public void setBudcCode(String budcCode) {
+        this.budcCode = budcCode;
+    }
+
     public String getDateDebut() {
         return dateDebut;
     }
@@ -124,6 +132,7 @@ public class ParametreRechercheDTO {
     private String typeFinCode="";
     private String sfinCode="";
     private String cadeCode="";
+    private String budcCode="";
     @JsonFormat(pattern="dd/MM/yyyy")
     private String dateDebut="";
     @JsonFormat(pattern="dd/MM/yyyy")
