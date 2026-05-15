@@ -13,6 +13,7 @@ import java.sql.Types;
 public class ParametreRechercheDTO {
     private int exe;
     private String exeCode="";
+    private String exeCode1="";
     private String sectionId="";
     private String sectionCode="";
     private String proId="";
@@ -23,6 +24,9 @@ public class ParametreRechercheDTO {
     private String sfinCode="";
     private String sfinCodeNew="";
     private String cadeCode="";
+    private String natId="";
+    private Integer natIdNumber;
+    private String natCode="";
     private String matricule="";
     @JsonFormat(pattern="dd/MM/yyyy")
     private String dateDebut="";
@@ -30,9 +34,7 @@ public class ParametreRechercheDTO {
     private String dateFin="";
 
     private String budcCode="";
-    private String natId="";
-    private String natCode="";
-    private BigDecimal bailfCode;
+    private int bailfCode;
     private BigDecimal cp1Prec;
     private BigDecimal cp1;
     private BigDecimal aeAnt;

@@ -175,13 +175,11 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
                     // si plusieurs procédures avec même nom dans la BD oracle
                     .withoutProcedureColumnMetaDataAccess()
                     .declareParameters(
-                            // =====================
-                            // IN
-                            // =====================
+                            new SqlOutParameter("P_BUC_CODE", Types.VARCHAR),
                             new SqlParameter("P_LBUC_SEC_ID", Types.VARCHAR),
                             new SqlParameter("P_LBUC_BUDC_CODE", Types.VARCHAR),
                             new SqlParameter("P_LBUC_CHAP_ID", Types.VARCHAR),
-                            new SqlParameter("P_LBUC_NAT_ID", Types.VARCHAR),
+                            new SqlParameter("P_LBUC_NAT_ID", Types.NUMERIC),
                             new SqlParameter("P_LBUC_CADE_CODE", Types.VARCHAR),
                             new SqlParameter("P_LBUC_SFIN_CODE", Types.VARCHAR),
                             new SqlParameter("P_LBUC_SFIN_CODE_NEW", Types.VARCHAR),
@@ -192,11 +190,6 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
                             new SqlParameter("P_LBUC_AE_1_PREC", Types.NUMERIC),
                             new SqlParameter("P_LBUC_AE_1", Types.NUMERIC),
                             new SqlParameter("P_LBUC_FONCACT_ID", Types.VARCHAR),
-
-                            // =====================
-                            // OUT
-                            // =====================
-                            new SqlOutParameter("P_BUC_CODE", Types.NUMERIC),
                             new SqlOutParameter("p_etat", Types.NUMERIC),
                             new SqlOutParameter("p_erreur", Types.VARCHAR)
                     );
@@ -205,7 +198,7 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
             params.put("P_LBUC_SEC_ID", pr.getSectionId());
             params.put("P_LBUC_BUDC_CODE", pr.getBudcCode());
             params.put("P_LBUC_CHAP_ID", pr.getChapId());
-            params.put("P_LBUC_NAT_ID", pr.getNatId());
+            params.put("P_LBUC_NAT_ID", pr.getNatIdNumber());
             params.put("P_LBUC_CADE_CODE", pr.getCadeCode());
             params.put("P_LBUC_SFIN_CODE", pr.getSfinCode());
             params.put("P_LBUC_SFIN_CODE_NEW", pr.getSfinCodeNew());
@@ -237,7 +230,7 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
     }
 
     @Override
-    public ResponseDto updateLigneBudget(ParametreRechercheDTO pr) throws SQLException, ParseException {
+    public ResponseDto updateLigneBudget(String lbucCode, ParametreRechercheDTO pr) throws SQLException, ParseException {
         ResponseDto dto = new ResponseDto();
         try {
             SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate)
@@ -246,25 +239,18 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
                     // si plusieurs procédures avec même nom dans la BD oracle
                     .withoutProcedureColumnMetaDataAccess()
                     .declareParameters(
-                            // =====================
-                            // IN
-                            // =====================
                             new SqlParameter("P_LBUC_CODE", Types.VARCHAR),
                             new SqlParameter("P_LBUC_CP_1", Types.NUMERIC),
                             new SqlParameter("P_LBUC_AE_1", Types.NUMERIC),
                             new SqlParameter("P_LBUC_CP_MN", Types.NUMERIC),
                             new SqlParameter("P_LBUC_AE_MN", Types.NUMERIC),
                             new SqlParameter("P_LBUC_FONCACT_ID", Types.VARCHAR),
-
-                            // =====================
-                            // OUT
-                            // =====================
                             new SqlOutParameter("p_etat", Types.NUMERIC),
                             new SqlOutParameter("p_erreur", Types.VARCHAR)
                     );
 
             Map<String, Object> params = new HashMap<>();
-            params.put("P_LBUC_CODE", pr.getBudcCode());
+            params.put("P_LBUC_CODE", lbucCode);
             params.put("P_LBUC_CP_1", pr.getCp1());
             params.put("P_LBUC_AE_1", pr.getAe1());
             params.put("P_LBUC_CP_MN", pr.getCpMn());

@@ -1,5 +1,6 @@
 package sn.sysbudgep.elaboration.controller.fonctionnementInvestissement;
 
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.web.bind.annotation.*;
 import sn.sysbudgep.elaboration.dto.classe.MontantAECPDto;
 import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
@@ -48,8 +49,9 @@ public class saisieMajFoncInvessController {
     }
 
     // Update Ligne budget
-    @PostMapping(value = "updateLigneBudget")
-    public ResponseDto updateLigneBudget(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
-        return saisieMajFctInvesService.updateLigneBudget(pr);
+    @PutMapping(value = "updateLigneBudget/{lbucCode}")
+    public ResponseDto updateLigneBudget(@PathVariable String lbucCode,
+                                         @RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
+        return saisieMajFctInvesService.updateLigneBudget(lbucCode, pr);
     }
 }

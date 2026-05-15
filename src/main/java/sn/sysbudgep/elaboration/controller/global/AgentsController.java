@@ -12,7 +12,7 @@ import java.text.ParseException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/gents")
+@RequestMapping("/agents")
 //@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
 @CrossOrigin(origins = "*",maxAge = 3600)
 public class AgentsController {
@@ -24,7 +24,7 @@ public class AgentsController {
     }
 
     // Tous les agents par chapitre ou un seul agent si matricule est renseigné
-    @PostMapping(value = "/")
+    @PostMapping(value = "")
     public List<Agents> montantsAECPLigne(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
         return agentsService.agents(pr);
     }

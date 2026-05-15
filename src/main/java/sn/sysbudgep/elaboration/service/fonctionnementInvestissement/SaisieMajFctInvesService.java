@@ -23,5 +23,5 @@ public interface SaisieMajFctInvesService {
     ResponseDto insertLigneBudget(ParametreRechercheDTO pr) throws SQLException, ParseException;
 
     // Update ligne budgétaire
-    ResponseDto updateLigneBudget(ParametreRechercheDTO pr) throws SQLException, ParseException;
+    ResponseDto updateLigneBudget(String lbucCode, ParametreRechercheDTO pr) throws SQLException, ParseException;
 }
