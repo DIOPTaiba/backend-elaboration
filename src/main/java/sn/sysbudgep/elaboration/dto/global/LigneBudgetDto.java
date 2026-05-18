@@ -1,6 +1,7 @@
 package sn.sysbudgep.elaboration.dto.global;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 public interface LigneBudgetDto {
     BigDecimal getAeLFI0();
@@ -14,4 +15,6 @@ public interface LigneBudgetDto {
     String getCodeLigne();
     String getLibLigne();
     String getIdLigne();
+    String getLbuCode();
+    Date getDateLigne();
 }

@@ -6,7 +6,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import sn.sysbudgep.elaboration.dto.global.ActiviteDto;
 import sn.sysbudgep.elaboration.dto.global.LigneBudgetDto;
-import sn.sysbudgep.elaboration.dto.global.ProgrammeDto;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
 import sn.sysbudgep.elaboration.entity.fonctionnementInvestissement.SaisieMajFctInves;
 
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
 @Repository
 public interface SaisieMajFctInvesRepository extends JpaRepository<SaisieMajFctInves, String> {
 
-    @Query(value = "select c.LBUC_LFI_AE aeLFI0, c.LBUC_LFI_CP cpLFI0, c.lbuc_ae_1 aeLFI1,c.lbuc_cp_1 cpLFI1, action.cop_code codeAction, action.cop_libelle libAction, \n" +
+    @Query(value = "select c.LBUC_DATE dateLigne,c.LBUC_CODE lbuCode, c.LBUC_LFI_AE aeLFI0, c.LBUC_LFI_CP cpLFI0, c.lbuc_ae_1 aeLFI1,c.lbuc_cp_1 cpLFI1, action.cop_code codeAction, action.cop_libelle libAction, \n" +
             "activite.cop_code codeActivite, activite.cop_libelle libActivite,\n" +
             "nat_code codeLigne, nat_libelle libLigne\n" +
             "from vb3_ligne_budget_comp_lfi c, tb_comp_prog action, tb_comp_prog activite, vb3_nature_eco\n" +
@@ -54,5 +55,10 @@ public interface SaisieMajFctInvesRepository extends JpaRepository<SaisieMajFctI
                                      @Param("budc_code") String budcCode,
                                      @Param("chap_id") String chapId,
                                      @Param("sfin_code") String sfinCode);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM vb3_ligne_budget_comp_lfi WHERE LBUC_CODE = :lbucCode", nativeQuery = true)
+    void supprimerLigneBudget(@Param("lbucCode") String lbucCode);
 
 }

@@ -30,4 +30,8 @@ public interface SaisieMajFctInvesService {
 
     // Update ligne budgétaire
     ResponseDto updateLigneBudget(String lbucCode, ParametreRechercheDTO pr) throws SQLException, ParseException;
+
+    // Suppression ligne budgétaire
+    boolean supprimerLigneBudget(String lbucCode);
+
 }

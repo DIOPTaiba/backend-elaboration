@@ -285,6 +285,12 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
         return dto;
     }
 
+    @Override
+    public boolean supprimerLigneBudget(String lbucCode) {
+        saisieMajFctInvesRepository.supprimerLigneBudget(lbucCode);
+        return true;
+    }
+
     // pour gérer les null
     private BigDecimal getBigDecimal(Map<String, Object> result, String key) {
         return Optional.ofNullable((BigDecimal) result.get(key))

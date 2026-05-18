@@ -20,4 +20,5 @@ public class LigneBudgetDto {
     private String libActivite;
     private String codeLigne;
     private String libLigne;
+
 }

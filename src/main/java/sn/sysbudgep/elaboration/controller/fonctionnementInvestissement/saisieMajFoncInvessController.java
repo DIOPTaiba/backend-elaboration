@@ -25,6 +25,11 @@ public class saisieMajFoncInvessController {
         this.saisieMajFctInvesService = saisieMajFctInvesService;
     }
 
+    // Suppression Ligne budget
+    @DeleteMapping(value = "supprimerLigneBudget/{lbucCode}")
+    public boolean supprimerLigneBudget(@PathVariable String lbucCode) {
+        return saisieMajFctInvesService.supprimerLigneBudget(lbucCode);
+    }
     // Montants AE/CP d'une ligne d'enveloppe pour n1, n2 et n3
     @PostMapping(value = "montantsAECPLigne")
     public MontantAECPDto montantsAECPLigne(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
