@@ -13,7 +13,7 @@ import java.util.List;
 public interface AgentsRepository extends JpaRepository<SaisieMajFctInves, String> {
 
     @Query(value = "SELECT\n" +
-            "    e.EMPAG_LIB AS emploi,\n" +
+            "    e.EMPAG_CODE, e.EMPAG_LIB AS emploi,\n" +
             "    a.AFFAG_AGT_MAT AS matricule,\n" +
             "    a.AFFAG_AGT_PRENOMS || ' ' || a.AFFAG_AGT_NOM AS nom,\n" +
             "    CASE \n" +
@@ -75,7 +75,9 @@ public interface AgentsRepository extends JpaRepository<SaisieMajFctInves, Strin
             "AND a.AFFAG_CHAP_ID = '17000014'\n" +
             "AND a.AFFAG_EXPB_CODE = '2026_1'\n" +
             "and b.TRTAG_AGT_MAT LIKE '%'||:matricule\n" +
+            "AND e.EMPAG_CODE LIKE '%'||:codeEmploi\n" +
             "GROUP BY\n" +
+            "    e.EMPAG_CODE,\n" +
             "    e.EMPAG_LIB,\n" +
             "    a.AFFAG_AGT_MAT,\n" +
             "    a.AFFAG_AGT_PRENOMS || ' ' || a.AFFAG_AGT_NOM,\n" +
@@ -86,6 +88,7 @@ public interface AgentsRepository extends JpaRepository<SaisieMajFctInves, Strin
             "    action.cop_code, action.cop_libelle, \n" +
             "    activite.cop_code, activite.cop_libelle\n" +
             "ORDER BY nom", nativeQuery = true)
-    List<Agents> agents(@Param("exeCode") String exeCode, @Param("chapId") String chapId, @Param("matricule") String matricule);
+    List<Agents> agents(@Param("exeCode") String exeCode, @Param("chapId") String chapId,
+                        @Param("matricule") String matricule, @Param("codeEmploi") String codeEmploi);
 
 }

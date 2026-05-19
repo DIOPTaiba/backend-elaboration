@@ -20,6 +20,6 @@ public class AgentsImpl implements AgentsService {
 
     @Override
     public List<Agents> agents(ParametreRechercheDTO pr) {
-        return agentsRepository.agents(pr.getExeCode(), pr.getChapId(), pr.getMatricule());
+        return agentsRepository.agents(pr.getExeCode(), pr.getChapId(), pr.getMatricule(), pr.getCodeEmploi());
     }
 }
