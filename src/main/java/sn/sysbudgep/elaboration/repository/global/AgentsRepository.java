@@ -72,8 +72,8 @@ public interface AgentsRepository extends JpaRepository<SaisieMajFctInves, Strin
             "AND SUBSTR(n.NAT_CODE,1,3) = p.PRG_CODE\n" +
             "AND a.AFFAG_COP_ID = action.cop_id\n" +
             "AND a.AFFAG_ACTV_ID = activite.cop_id\n" +
-            "AND a.AFFAG_CHAP_ID = '17000014'\n" +
-            "AND a.AFFAG_EXPB_CODE = '2026_1'\n" +
+            "AND a.AFFAG_CHAP_ID =:chapId\n" +
+            "AND a.AFFAG_EXPB_CODE =:exeCode\n" +
             "and b.TRTAG_AGT_MAT LIKE '%'||:matricule\n" +
             "AND e.EMPAG_CODE LIKE '%'||:codeEmploi\n" +
             "GROUP BY\n" +
