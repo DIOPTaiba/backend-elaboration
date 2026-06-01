@@ -28,6 +28,7 @@ public class MajEffectifsEmploisController {
     // Montants AE/CP d'une ligne d'enveloppe pour n1, n2 et n3
     @PostMapping(value = "chapitreEffectifs")
     public List<ChapitreEffectifsDto> chapitreEffectifs(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
+        System.out.println("TTTTTTTTTT : "+pr.getIdEmploi());
         return majEmploisEffectifsService.chapitreEffectifs(pr);
     }
 }

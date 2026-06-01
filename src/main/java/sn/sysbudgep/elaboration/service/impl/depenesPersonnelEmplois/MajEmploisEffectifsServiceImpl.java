@@ -43,6 +43,6 @@ public class MajEmploisEffectifsServiceImpl implements MajEmploisEffectifsServic
 
     @Override
     public List<ChapitreEffectifsDto> chapitreEffectifs(ParametreRechercheDTO pr) throws SQLException, ParseException {
-        return chapitreEffectifsRepository.chapitreEffectifs(pr.getExeCode(), pr.getExeCode1(), pr.getProId());
+        return chapitreEffectifsRepository.chapitreEffectifs(pr.getExeCode(), pr.getExeCode1(), pr.getProId(), pr.getIdEmploi());
     }
 }

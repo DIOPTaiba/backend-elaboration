@@ -30,6 +30,7 @@ public class ParametreRechercheDTO {
     private String natCode="";
     private String matricule="";
     private String codeEmploi="";
+    private Integer idEmploi;
     @JsonFormat(pattern="dd/MM/yyyy")
     private String dateDebut="";
     @JsonFormat(pattern="dd/MM/yyyy")
