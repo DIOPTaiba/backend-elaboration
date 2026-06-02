@@ -12,8 +12,8 @@ import java.sql.Types;
 @Setter
 public class ParametreRechercheDTO {
     private int exe;
+    private String exeCode0="";
     private String exeCode="";
-    private String exeCode1="";
     private String sectionId="";
     private String sectionCode="";
     private String proId="";
@@ -44,5 +44,8 @@ public class ParametreRechercheDTO {
     private BigDecimal cpMn;
     private BigDecimal aeMn;
     private String foncatId="";
+    private String foncatIdModif="";
+    private String observations="";
+    private int effectif;
 
 }

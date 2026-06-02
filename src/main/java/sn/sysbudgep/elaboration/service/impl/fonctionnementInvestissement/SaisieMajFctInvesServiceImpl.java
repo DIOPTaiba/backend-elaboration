@@ -16,14 +16,13 @@ import sn.sysbudgep.elaboration.dto.global.LigneBudgetDto;
 import sn.sysbudgep.elaboration.repository.fonctionnementInvestissement.SaisieMajFctInvesRepository;
 import sn.sysbudgep.elaboration.service.fonctionnementInvestissement.SaisieMajFctInvesService;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import static sn.sysbudgep.elaboration.util.OracleResult.*;
 
 @Service
 public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
@@ -177,10 +176,10 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
     }
     @Override
     public ResponseDto insertLigneBudget(ParametreRechercheDTO pr) throws SQLException, ParseException {
-        ResponseDto dto = new ResponseDto();
+        ResponseDto responseDto = new ResponseDto();
         try {
             SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate)
-                    .withCatalogName("PK4ELAB_LIGNE_BUDGET_COMP")
+                    .withCatalogName("PK4_ELAB_LIGNE_BUDGET_COMP")
                     .withProcedureName("p_insertion")
                     // si plusieurs procédures avec même nom dans la BD oracle
                     .withoutProcedureColumnMetaDataAccess()
@@ -225,18 +224,18 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
             // =====================
             // MAPPING
             // =====================
-            dto.setNumero(getString(result,"P_BUC_CODE"));
-            dto.setEtat(getInteger(result, "p_etat"));
-            dto.setMessageErreur(getString(result, "p_erreur"));
+            responseDto.setNumero(getString(result,"P_BUC_CODE"));
+            responseDto.setEtat(getInteger(result, "p_etat"));
+            responseDto.setMessageErreur(getString(result, "p_erreur"));
 
         } catch (DataAccessException e) {
-            logger.error("Erreur base de données procédure PK4ELAB_LIGNE_BUDGET_COMP.p_insertion", e);
+            logger.error("Erreur base de données procédure PK4_ELAB_LIGNE_BUDGET_COMP.p_insertion", e);
             throw new RuntimeException(
                     "Erreur récupération résultat", e
             );
         }
 
-        return dto;
+        return responseDto;
     }
 
     @Override
@@ -244,7 +243,7 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
         ResponseDto dto = new ResponseDto();
         try {
             SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate)
-                    .withCatalogName("PK4ELAB_LIGNE_BUDGET_COMP")
+                    .withCatalogName("PK4_ELAB_LIGNE_BUDGET_COMP")
                     .withProcedureName("p_update")
                     // si plusieurs procédures avec même nom dans la BD oracle
                     .withoutProcedureColumnMetaDataAccess()
@@ -276,7 +275,7 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
             dto.setMessageErreur(getString(result, "p_erreur"));
 
         } catch (DataAccessException e) {
-            logger.error("Erreur base de données procédure PK4ELAB_LIGNE_BUDGET_COMP.p_update", e);
+            logger.error("Erreur base de données procédure PK4_ELAB_LIGNE_BUDGET_COMP.p_update", e);
             throw new RuntimeException(
                     "Erreur récupération résultat", e
             );
@@ -291,22 +290,4 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
         return true;
     }
 
-    // pour gérer les null
-    private BigDecimal getBigDecimal(Map<String, Object> result, String key) {
-        return Optional.ofNullable((BigDecimal) result.get(key))
-                .orElse(BigDecimal.ZERO);
-    }
-
-    private String getString(Map<String, Object> result, String key) {
-        return Optional.ofNullable((String) result.get(key))
-                .orElse("");
-    }
-
-    private Integer getInteger(Map<String, Object> result, String key) {
-        Object value = result.get(key);
-        if (value == null) {
-            return 0;
-        }
-        return ((Number) value).intValue();
-    }
 }

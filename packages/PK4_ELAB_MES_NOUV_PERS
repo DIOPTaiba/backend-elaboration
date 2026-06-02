@@ -1,0 +1,34 @@
+create or replace PACKAGE PK4_ELAB_MES_NOUV_PERS AS
+
+PROCEDURE P_INSERTION(P_MNP_EXPB_CODE varchar2,
+                      P_MNP_CHAP_ID varchar2,
+                      P_MNP_EMP_ID number,
+                      P_MNP_SEC_ID varchar2,
+                      P_MNP_EFFECTIF number,
+                      P_MNP_OBS varchar2,
+                      P_MNP_FONC_SAISI varchar2,
+                      P_MNP_DATE_SAISIE date,
+                      P_MNP_date_modif date,
+                      P_MNP_fonc_modif varchar2,
+                      P_ETAT OUT number,
+                      P_ERREUR OUT VARCHAR2);
+
+PROCEDURE P_MODIFIER(P_MNP_EXPB_CODE varchar2,
+                      P_MNP_CHAP_ID varchar2,
+                      P_MNP_EMP_ID number,
+                      P_MNP_SEC_ID varchar2,
+                      P_MNP_EFFECTIF number,
+                      P_MNP_OBS varchar2,
+                      P_MNP_date_modif date,
+                      P_MNP_fonc_modif varchar2,
+                      P_ETAT OUT number,
+                      P_ERREUR OUT VARCHAR2);
+
+PROCEDURE P_Supprimer(P_MNP_EXPB_CODE varchar2,
+                      P_MNP_CHAP_ID varchar2,
+                      P_MNP_EMP_ID number,
+                      P_MNP_SEC_ID varchar2,
+                      P_ETAT OUT number,
+                      P_ERREUR OUT VARCHAR2);
+
+END PK4_ELAB_MES_NOUV_PERS;

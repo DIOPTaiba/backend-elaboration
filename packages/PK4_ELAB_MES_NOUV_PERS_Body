@@ -1,0 +1,117 @@
+create or replace PACKAGE BODY PK4_ELAB_MES_NOUV_PERS AS
+
+PROCEDURE P_INSERTION(P_MNP_EXPB_CODE varchar2,
+                      P_MNP_CHAP_ID varchar2,
+                      P_MNP_EMP_ID number,
+                      P_MNP_SEC_ID varchar2,
+                      P_MNP_EFFECTIF number,
+                      P_MNP_OBS varchar2,
+                      P_MNP_FONC_SAISI varchar2,
+                      P_MNP_DATE_SAISIE date,
+                      P_MNP_date_modif date,
+                      P_MNP_fonc_modif varchar2,
+                      P_ETAT OUT number,
+                      P_ERREUR OUT VARCHAR2) IS
+
+cursor c is select act_mat from tb_acteur where act_login=user;
+v_matricule varchar2(10);
+begin
+
+  /*p_etat:=0;
+  p_erreur:='La mise à jour des traitements des agents est verrouillée.';
+  return;*/
+
+  open c;
+  fetch c into v_matricule;
+  close c;
+  if fb3_verrou_sectoriel(P_MNP_FONC_SAISI, v_matricule)<>1 then
+     P_ETAT :=0 ;
+     P_ERREUR:='Privilèges insuffisants';
+     return ;
+  else
+    insert into TB_MES_NOUV_PERS (MNP_EXPB_CODE,MNP_CHAP_ID,MNP_EMP_ID,MNP_SEC_ID,MNP_EFFECTIF,MNP_OBS,
+                                  MNP_FONC_ID_SAISIE,MNP_DATE_SAISIE,MNP_DATE_MODIF,MNP_FONC_ID_MODIF)
+                                 values(P_MNP_EXPB_CODE,P_MNP_CHAP_ID,P_MNP_EMP_ID,P_MNP_SEC_ID,P_MNP_EFFECTIF,P_MNP_OBS,
+                                 P_MNP_FONC_SAISI,P_MNP_DATE_SAISIE,P_MNP_date_modif,P_MNP_fonc_modif);
+     P_ETAT :=1 ;
+  end if;
+  EXCEPTION
+    when others then
+       P_ETAT := 0;
+       P_ERREUR:=SQLERRM;
+end P_INSERTION;
+------------------------------------------------------------------
+PROCEDURE P_MODIFIER(P_MNP_EXPB_CODE varchar2,
+                      P_MNP_CHAP_ID varchar2,
+                      P_MNP_EMP_ID number,
+                      P_MNP_SEC_ID varchar2,
+                      P_MNP_EFFECTIF number,
+                      P_MNP_OBS varchar2,
+                      P_MNP_date_modif date,
+                      P_MNP_fonc_modif varchar2,
+                      P_ETAT OUT number,
+                      P_ERREUR OUT VARCHAR2) IS
+cursor c is select act_mat from tb_acteur where act_login=user;
+v_matricule varchar2(10);
+begin
+  open c;
+  fetch c into v_matricule;
+  close c;
+  if fb3_verrou_sectoriel(P_MNP_fonc_modif, v_matricule)<>1 then
+     P_ETAT :=0 ;
+     P_ERREUR:='Privilèges insuffisants';
+     return ;
+  else
+     update TB_MES_NOUV_PERS set MNP_EFFECTIF=P_MNP_EFFECTIF, MNP_OBS=P_MNP_OBS, MNP_DATE_MODIF=P_MNP_date_modif, MNP_FONC_ID_MODIF=P_MNP_fonc_modif
+     where MNP_EXPB_CODE=P_MNP_EXPB_CODE and MNP_CHAP_ID=P_MNP_CHAP_ID and MNP_EMP_ID=P_MNP_EMP_ID and MNP_SEC_ID=P_MNP_SEC_ID;
+     P_ETAT :=1 ;
+  end if;
+  EXCEPTION
+    when others then
+       P_ETAT := 0;
+       P_ERREUR:=SQLERRM;
+end P_MODIFIER;
+------------------------------------------------------------------
+PROCEDURE P_Supprimer(P_MNP_EXPB_CODE varchar2,
+                      P_MNP_CHAP_ID varchar2,
+                      P_MNP_EMP_ID number,
+                      P_MNP_SEC_ID varchar2,
+                      P_ETAT OUT number,
+                      P_ERREUR OUT VARCHAR2) IS
+    v_nombre number;
+  cursor c is select act_mat,ACT_FONCACT_ID from tb_acteur where act_login=user;
+  v_matricule varchar2(10);
+  v_fonction varchar2(10);
+begin
+  open c;
+  fetch c into v_matricule,v_fonction;
+  close c;
+  if fb3_verrou_sectoriel(v_fonction, v_matricule)<>1 then
+     P_ETAT :=0 ;
+     P_ERREUR:='Privilèges insuffisants';
+     return ;
+  end if;
+
+  select count(*) into v_nombre from TB_MES_NOUV_TRAIT
+  where mnt_mnp_expb_code=P_MNP_EXPB_CODE
+  and mnt_mnp_chap_id=P_MNP_CHAP_ID
+  and mnt_mnp_emp_id=P_MNP_EMP_ID
+  and mnt_mnp_sec_id=P_MNP_SEC_ID;
+
+   IF nvl(v_nombre,0)>0 THEN
+     P_ETAT := 0;
+     P_ERREUR:='Il existe deja des traitements associes aux mesures nouvelles. Veuillez supprimer d''abord  ces traitements.';
+     return;
+   END IF;
+
+   delete from TB_MES_NOUV_PERS
+   where MNP_EXPB_CODE=P_MNP_EXPB_CODE and MNP_CHAP_ID=P_MNP_CHAP_ID and MNP_EMP_ID=P_MNP_EMP_ID and MNP_SEC_ID=P_MNP_SEC_ID;
+   P_ETAT := 1;
+
+   EXCEPTION
+    when others then
+       P_ETAT := 0;
+       P_ERREUR:=SQLERRM;
+end P_Supprimer;
+
+END PK4_ELAB_MES_NOUV_PERS;

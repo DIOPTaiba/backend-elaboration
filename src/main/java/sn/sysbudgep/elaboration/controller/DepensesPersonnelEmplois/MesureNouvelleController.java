@@ -2,6 +2,7 @@ package sn.sysbudgep.elaboration.controller.DepensesPersonnelEmplois;
 
 import org.springframework.web.bind.annotation.*;
 import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
+import sn.sysbudgep.elaboration.dto.classe.ResponseDto;
 import sn.sysbudgep.elaboration.dto.depensesPersonnelEmplois.ChapitreEffectifsDto;
 import sn.sysbudgep.elaboration.dto.depensesPersonnelEmplois.MesureNouvelleDto;
 import sn.sysbudgep.elaboration.service.depenesPersonnelEmplois.MajEmploisEffectifsService;
@@ -27,5 +28,11 @@ public class MesureNouvelleController {
     @PostMapping(value = "parChapId")
     public List<MesureNouvelleDto> mesureNouvelleChapId(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
         return mesureNouvelleService.mesuresNouvelles(pr);
+    }
+
+    // Insert Mesures Nouvelles
+    @PostMapping(value = "")
+    public ResponseDto insertMesuresNouvelles(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
+        return mesureNouvelleService.insertMesuresNouvelles(pr);
     }
 }
