@@ -39,6 +39,7 @@ public interface ChapitreEffectifsRepository extends JpaRepository<SaisieMajFctI
             "    FROM vb3_affectation_agent a\n" +
             "    WHERE a.AFFAG_EXPB_CODE=:exeCode1\n" +
             "    AND a.AFFAG_PRO_ID =:proId\n" +
+            "    AND (:idEmploi IS NULL OR a.AFFAG_EMPAG_ID = :idEmploi)\n" +
             "    GROUP BY \n" +
             "        a.AFFAG_CHAP_ID,\n" +
             "        CASE \n" +
@@ -60,6 +61,7 @@ public interface ChapitreEffectifsRepository extends JpaRepository<SaisieMajFctI
             "    FROM vb3_hist_affectation_agent a\n" +
             "    WHERE a.AFFAG_EXPB_CODE=:exeCode\n" +
             "    AND a.AFFAG_PRO_ID =:proId\n" +
+            "    AND (:idEmploi IS NULL OR a.AFFAG_EMPAG_ID = :idEmploi)\n" +
             "    GROUP BY \n" +
             "        a.AFFAG_CHAP_ID,\n" +
             "        CASE \n" +
@@ -83,6 +85,7 @@ public interface ChapitreEffectifsRepository extends JpaRepository<SaisieMajFctI
             "        ON a.AFFAG_AGT_MAT = b.TRTAG_AGT_MAT\n" +
             "    WHERE a.AFFAG_EXPB_CODE=:exeCode1\n" +
             "    AND a.AFFAG_PRO_ID =:proId\n" +
+            "    AND (:idEmploi IS NULL OR a.AFFAG_EMPAG_ID = :idEmploi)\n" +
             "    GROUP BY \n" +
             "        a.AFFAG_CHAP_ID,\n" +
             "        CASE \n" +
@@ -98,6 +101,7 @@ public interface ChapitreEffectifsRepository extends JpaRepository<SaisieMajFctI
             "    c.CHAP_LIB,  t.statut\n" +
             "ORDER BY \n" +
             "    c.CHAP_CODE, t.statut", nativeQuery = true)
-    List<ChapitreEffectifsDto> chapitreEffectifs(@Param("exeCode") String exeCode, @Param("exeCode1") String exeCode1, @Param("proId") String proId);
+    List<ChapitreEffectifsDto> chapitreEffectifs(@Param("exeCode") String exeCode, @Param("exeCode1") String exeCode1,
+                                                 @Param("proId") String proId, @Param("idEmploi") Integer idEmploi);
 
 }

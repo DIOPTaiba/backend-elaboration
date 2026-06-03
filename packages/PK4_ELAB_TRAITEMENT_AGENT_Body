@@ -1,0 +1,476 @@
+create or replace PACKAGE BODY PK4_ELAB_TRAITEMENT_AGENT AS
+
+---------------------------------------------------------------------------------------
+function f_next_id return number is
+  cursor c_max is select max(TRTAG_ID) from tb_traitement_agent;
+  v_max number;
+begin
+  open c_max;
+  fetch c_max into v_max;
+  close c_max;
+  return nvl(v_max,0)+1;
+end f_next_id;
+---------------------------------------------------------------------------------------
+function f_ptil_modifier(p_expb varchar, p_mat varchar2, p_acteur varchar2) return number is
+/*cette fonction retourne 1 si un acteur peut modifier les traitements d'un agent, 0 sinon
+ -- l'acteur doit avoir le privilege PPPB20*/
+ cursor c_sec is select affag_sec_id from tb_affectation_agent
+                 where affag_agt_mat=p_mat and affag_expb_code=p_expb;
+ v_sec varchar2(10);
+begin
+ if fb3_verrou_sectoriel(p_acteur, p_mat)=0 then
+    return 0;
+ else
+    return 1;
+ end if;
+
+ open c_sec;
+ fetch c_sec into v_sec;
+ close c_sec;
+
+ return PK3_PRIVILEGE_PPPB.f_get_priv_sur_sec(p_expb, p_acteur, v_sec, null, 'PPPB20');
+
+end f_ptil_modifier;
+---------------------------------------------------------------------------------------
+FUNCTION F_IS_MODIFIABLE(pexpb varchar2, p_sec varchar2) return number is
+  --renvoie 1 si les traitements ou emplois ne peuvent etre  modifies, 0 sinon
+  v_val number;
+begin
+  v_val:=1;
+  return v_val;
+end F_IS_MODIFIABLE;
+---------------------------------------------------------------------------------------------------------
+procedure P_DESC_AGENT(p_mat varchar2, p_nom out varchar2, p_prenom out varchar2, p_emploi out number) is
+  cursor c_agent is select agt_nom, agt_prenoms, agt_empag_id from tb_agent where agt_mat=p_mat;
+
+begin
+  open c_agent;
+  fetch c_agent into p_nom,p_prenom,p_emploi;
+  close c_agent;
+end P_DESC_AGENT;
+--- -------------------------------------------------------------------------------------
+procedure p_maj_par_nat_eco(p_expb varchar,
+                          p_sec varchar2,
+                          p_mat varchar2,
+                          p_profil number,
+                          p_nat number,
+                          p_mont number,
+                          P_TEXTE_REF varchar2,
+                          P_OBS varchar2,
+                          p_acteur varchar2,
+                          p_etat out number,
+                          p_erreur out varchar2
+                          ) is
+  cursor c_verif1 is select TRTAG_ID from tb_traitement_agent
+                    where TRTAG_EXPB_CODE=p_expb and TRTAG_NAT_ID=p_nat and TRTAG_AGT_MAT=p_mat;
+
+  cursor c_verif2 is select TRTAG_ID from tb_traitement_agent
+                    where TRTAG_EXPB_CODE=p_expb and TRTAG_NAT_ID=p_nat and TRTAG_PFLAG_ID=p_profil;
+
+  v_verif number;
+  v_id number;
+  v_op varchar2(1); --M=modifier, I=inserer
+begin
+ /* p_etat:=0;
+  p_erreur:='La mise à jour des traitements des agents est verrouillée.';
+  return;*/
+
+  if p_expb is null then
+     p_etat:=0;
+     p_erreur:='L''exercice budgetaire doit etre renseigne.';
+     return;
+  end if;
+
+  if p_mat is null then
+     p_etat:=0;
+     p_erreur:='Le matricule de l''agent doit etre renseigne.';
+     return;
+  end if;
+
+  if p_mont is null then
+     p_etat:=0;
+     p_erreur:='Le montant alloue pour la nature de depense doit etre renseigne.';
+     return;
+  end if;
+
+  if p_nat is null then
+     p_etat:=0;
+     p_erreur:='La reference de la nature economique de la depense doit etre renseignee.';
+     return;
+  end if;
+
+  if p_mat is not null and f_ptil_modifier(p_expb,p_mat,p_acteur)<>1 then
+     p_etat:=0;
+     p_erreur:='Vos privileges ne suffisent pas pour la mise a jour du traitement de l''agent de matricule '||p_mat||'.';
+     return;
+  end if;
+
+  if f_is_modifiable(p_expb,p_sec)<>1 then
+     p_etat:=0;
+     p_erreur:='Le statut actuel du projet de budget ne permet pas la mise a jour des traitements des agents.';
+     return;
+  end if;
+
+  if p_mat is null then
+     open c_verif1;
+     fetch c_verif1 into v_verif;
+     if c_verif1%notfound then --pour faire une insertion
+       v_op:='I';
+     else   --pour faire une mise a jour
+       v_op:='M';
+     end if;
+     close c_verif1;
+  elsif p_profil is null then
+     open c_verif2;
+     fetch c_verif2 into v_verif;
+     if c_verif2%notfound then --pour faire une insertion
+       v_op:='I';
+     else    --pour faire une mise a jour
+       v_op:='M';
+     end if;
+     close c_verif2;
+  end if;
+
+  if v_op='I' then
+     v_id:=f_next_id;
+     insert into tb_traitement_agent (TRTAG_ID,TRTAG_AGT_MAT, TRTAG_PFLAG_ID, TRTAG_EXPB_CODE,TRTAG_NAT_ID, TRTAG_MONT,
+                                     TRTAG_TEXTE_REF, TRTAG_OBS, TRTAG_FONCACT_ID_SAI, TRTAG_DATE_SAI)
+                               values(v_id, p_mat, p_profil, p_expb, p_nat, p_mont,
+                                      P_TEXTE_REF, P_OBS, p_acteur, sysdate);
+  elsif v_op='M' then  --faire une mise a jour
+     update tb_traitement_agent set TRTAG_MONT=p_mont, TRTAG_TEXTE_REF=P_TEXTE_REF, TRTAG_OBS=P_OBS,
+                                    TRTAG_FONCACT_ID_MODIF=p_acteur, TRTAG_DATE_MODIF=sysdate
+                                    where TRTAG_ID=v_verif;
+  end if;
+
+  p_etat:=1;
+
+  Exception
+    when others then
+          p_etat:=0;
+          p_erreur:=sqlerrm;
+end p_maj_par_nat_eco;
+--- -------------------------------------------------------------------------------------
+procedure p_insert_trait_agent(p_trait out number,
+                          p_expb varchar,
+                          p_mat varchar2,
+                          p_nat number,
+                          p_mont number,
+                          P_TEXTE_REF varchar2,
+                          P_OBS varchar2,
+                          p_acteur varchar2,
+                          p_etat out number,
+                          p_erreur out varchar2
+                          ) is
+ cursor c_verif is select TRTAG_ID from tb_traitement_agent
+                    where TRTAG_EXPB_CODE=p_expb and TRTAG_NAT_ID=p_nat and TRTAG_AGT_MAT=p_mat;
+
+ cursor c_rech is select affag_sec_id from tb_affectation_agent
+                    where AFFAG_EXPB_CODE=p_expb and AFFAG_AGT_MAT=p_mat;
+
+  v_verif number;
+  v_id number;
+  v_sec_id  varchar2(10);
+
+begin
+  /*p_etat:=0;
+  p_erreur:='La mise à jour des traitements des agents est verrouillée.';
+  return;*/
+
+  if p_expb is null then
+     p_etat:=0;
+     p_erreur:='L''exercice budgetaire doit etre renseigne.';
+     return;
+  end if;
+
+  if p_mat is null then
+     p_etat:=0;
+     p_erreur:='Le matricule de l''agent doit etre renseigne.';
+     return;
+  end if;
+
+  if p_mont is null then
+     p_etat:=0;
+     p_erreur:='Le montant alloue pour la nature de depense doit etre renseigne.';
+     return;
+  end if;
+
+  if p_nat is null then
+     p_etat:=0;
+     p_erreur:='La reference de la nature economique de la depense doit etre renseignee.';
+     return;
+  end if;
+
+  open c_verif;
+  fetch c_verif into v_verif;
+  if c_verif%found then
+     close c_verif;
+     p_etat:=0;
+     p_erreur:='Un traitement existe deja sur l''agent et la nature de depense. L''identifiant est le numero '||v_verif||'. Vous ne pouvez pas faire une nouvelle insertion.';
+     return;
+  end if;
+  close c_verif;
+
+  open c_rech;
+  fetch c_rech into v_sec_id;
+  if c_rech%notfound then
+     close c_rech;
+     p_etat:=0;
+     p_erreur:='L''agent '||p_mat||' n''est affecte a aucune section pour sur l''exercice '||substr(p_expb,1,4)||'.';
+     return;
+  end if;
+  close c_rech;
+
+  if f_ptil_modifier(p_expb,p_mat,p_acteur)<>1 then
+     p_etat:=0;
+     p_erreur:='Vos privileges ne suffisent pas pour la mise a jour du traitement de l''agent de matricule '||p_mat||'.';
+     return;
+  end if;
+
+  if f_is_modifiable(p_expb,v_sec_id)<>1 then
+     p_etat:=0;
+     p_erreur:='Le statut actuel du projet de budget ne permet pas la mise a jour des traitements des agents.';
+     return;
+  end if;
+
+  v_id:=f_next_id;
+  insert into tb_traitement_agent (TRTAG_ID,TRTAG_AGT_MAT, TRTAG_EXPB_CODE,TRTAG_NAT_ID, TRTAG_MONT,
+                                     TRTAG_TEXTE_REF, TRTAG_OBS, TRTAG_FONCACT_ID_SAI, TRTAG_DATE_SAI)
+                               values(v_id, p_mat, p_expb, p_nat, p_mont,
+                                      P_TEXTE_REF, P_OBS, p_acteur, sysdate);
+  p_etat:=1;
+  p_trait:=v_id;
+  Exception
+    when others then
+          p_etat:=0;
+          p_erreur:=sqlerrm;
+          p_trait:=null;
+end p_insert_trait_agent;
+--- -------------------------------------------------------------------------------------
+procedure p_maj_trait_agent(p_trait number,
+                          p_mont number,
+                          P_TEXTE_REF varchar2,
+                          P_OBS varchar2,
+                          p_acteur varchar2,
+                          p_etat out number,
+                          p_erreur out varchar2
+                          ) is
+
+ cursor c_verif is select AFFAG_EXPB_CODE, AFFAG_SEC_ID, AFFAG_AGT_MAT
+                    from tb_traitement_agent, tb_affectation_agent
+                    where AFFAG_EXPB_CODE=TRTAG_EXPB_CODE
+                    and AFFAG_AGT_MAT=TRTAG_AGT_MAT
+                    and TRTAG_ID=p_trait;
+
+  v_expb varchar2(10);
+  v_sec_id  varchar2(10);
+  v_mat varchar2(10);
+
+begin
+  /*p_etat:=0;
+  p_erreur:='La mise à jour des traitements des agents est verrouillée.';
+  return;*/
+
+  if p_mont is null then
+     p_etat:=0;
+     p_erreur:='Le montant alloue pour la nature de depense doit etre renseigne.';
+     return;
+  end if;
+
+  open c_verif;
+  fetch c_verif into v_expb, v_sec_id, v_mat;
+  if c_verif%notfound then
+     close c_verif;
+     p_etat:=0;
+     p_erreur:='Le traitement reference par '||p_trait||' est, inconnu du systeme.';
+     return;
+  end if;
+  close c_verif;
+
+  if F_PTIL_MODIFIER(v_expb,v_sec_id,p_acteur)<>1 then
+     p_etat:=0;
+     p_erreur:='Vos privileges ne suffisent pas pour la mise a jour du traitement de l''agent '||v_mat||'.';
+     return;
+  end if;
+
+  if f_is_modifiable(v_expb,v_sec_id)<>1 then
+     p_etat:=0;
+     p_erreur:='Le statut actuel du projet de budget ne permet pas la mise a jour des traitements des agents.';
+     return;
+  end if;
+
+  update tb_traitement_agent set TRTAG_MONT=p_mont, TRTAG_TEXTE_REF=P_TEXTE_REF, TRTAG_OBS=P_OBS,
+                                    TRTAG_FONCACT_ID_MODIF=p_acteur, TRTAG_DATE_MODIF=sysdate
+                                    where TRTAG_ID=p_trait;
+
+  p_etat:=1;
+  Exception
+    when others then
+          p_etat:=0;
+          p_erreur:=sqlerrm;
+end p_maj_trait_agent;
+
+--- -------------------------------------------------------------------------------------
+procedure p_insert_trait_profil(p_trait out number,
+                          p_expb varchar,
+                          p_profil varchar2,
+                          p_nat number,
+                          p_mont number,
+                          P_TEXTE_REF varchar2,
+                          P_OBS varchar2,
+                          p_acteur varchar2,
+                          p_etat out number,
+                          p_erreur out varchar2
+                          ) is
+ cursor c_verif is select TRTAG_ID from tb_traitement_agent
+                    where TRTAG_EXPB_CODE=p_expb and TRTAG_NAT_ID=p_nat and TRTAG_PFLAG_ID=p_profil;
+
+ cursor c_rech is select pflag_sec_id, pflag_pro_id from tb_profil_agent
+                    where PFLAG_EXPB_CODE=p_expb and PFLAG_ID=p_profil;
+
+  v_verif number;
+  v_id number;
+  v_sec_id  varchar2(10);
+  v_pro_id varchar2(10);
+
+begin
+  p_etat:=0;
+  p_erreur:='La mise à jour des traitements des agents est verrouillée.';
+  return;
+
+  if p_expb is null then
+     p_etat:=0;
+     p_erreur:='L''exercice budgetaire doit etre renseigne.';
+     return;
+  end if;
+
+  if p_profil is null then
+     p_etat:=0;
+     p_erreur:='Le profil d''agent recherche doit etre renseigne.';
+     return;
+  end if;
+
+  if p_nat is null then
+     p_etat:=0;
+     p_erreur:='La reference de la nature economique de la depense doit etre renseignee.';
+     return;
+  end if;
+
+  if p_mont is null then
+     p_etat:=0;
+     p_erreur:='Le montant alloue pour la nature de depense doit etre renseigne.';
+     return;
+  end if;
+
+  open c_verif;
+  fetch c_verif into v_verif;
+  if c_verif%found then
+     close c_verif;
+     p_etat:=0;
+     p_erreur:='Un traitement existe deja sur le profil et la nature de depense. L''identifiant est le numero '||v_verif||'. Vous ne pouvez pas faire une nouvelle insertion.';
+     return;
+  end if;
+  close c_verif;
+
+  open c_rech;
+  fetch c_rech into v_sec_id, v_pro_id;
+  if c_rech%notfound then
+     close c_rech;
+     p_etat:=0;
+     p_erreur:='Le profil '||p_profil||' n''existe pas dans l''exercice '||substr(p_expb,1,4)||'.';
+     return;
+  end if;
+  close c_rech;
+
+  if pk3_affectation_agent.F_PTIL_AFF_DANS_PROG(p_expb,v_pro_id,p_acteur)<>1 then
+     p_etat:=0;
+     p_erreur:='Vos privileges ne suffisent pas pour la mise a jour du traitement du profil '||p_profil||'.';
+     return;
+  end if;
+
+  if f_is_modifiable(p_expb,v_sec_id)<>1 then
+     p_etat:=0;
+     p_erreur:='Le statut actuel du projet de budget ne permet pas la mise a jour des traitements des profils.';
+     return;
+  end if;
+
+  v_id:=f_next_id;
+  insert into tb_traitement_agent (TRTAG_ID, TRTAG_PFLAG_ID, TRTAG_EXPB_CODE,TRTAG_NAT_ID, TRTAG_MONT,
+                                     TRTAG_TEXTE_REF, TRTAG_OBS, TRTAG_FONCACT_ID_SAI, TRTAG_DATE_SAI)
+                               values(v_id, p_profil, p_expb, p_nat, p_mont,
+                                      P_TEXTE_REF, P_OBS, p_acteur, sysdate);
+
+  p_etat:=1;
+  p_trait:=v_id;
+  Exception
+    when others then
+          p_etat:=0;
+          p_erreur:=sqlerrm;
+          p_trait:=null;
+end p_insert_trait_profil;
+--- -------------------------------------------------------------------------------------
+procedure p_maj_trait_profil(p_trait number,
+                          p_mont number,
+                          P_TEXTE_REF varchar2,
+                          P_OBS varchar2,
+                          p_acteur varchar2,
+                          p_etat out number,
+                          p_erreur out varchar2
+                          ) is
+
+ cursor c_verif is select TRTAG_EXPB_CODE, PFLAG_SEC_ID, PFLAG_PRO_ID, PFLAG_ID
+                    from tb_traitement_agent, tb_profil_agent
+                    where TRTAG_PFLAG_ID=PFLAG_ID and TRTAG_EXPB_CODE=PFLAG_EXPB_CODE
+                    and TRTAG_ID=p_trait;
+
+  v_expb varchar2(10);
+  v_sec_id  varchar2(10);
+  v_pro_id varchar2(10);
+  v_profil varchar2(10);
+
+begin
+  p_etat:=0;
+  p_erreur:='La mise à jour des traitements des agents est verrouillée.';
+  return;
+
+  if p_mont is null then
+     p_etat:=0;
+     p_erreur:='Le montant alloue pour la nature de depense doit etre renseigne.';
+     return;
+  end if;
+
+  open c_verif;
+  fetch c_verif into v_expb, v_sec_id, v_pro_id, v_profil;
+  if c_verif%notfound then
+     close c_verif;
+     p_etat:=0;
+     p_erreur:='Le traitement reference par '||p_trait||' est, inconnu du systeme, oubien il ne correspond pas a celui d''un profil d''agent.';
+     return;
+  end if;
+  close c_verif;
+
+  if pk3_affectation_agent.F_PTIL_AFF_DANS_PROG(v_expb,v_pro_id,p_acteur)<>1 then
+     p_etat:=0;
+     p_erreur:='Vos privileges ne suffisent pas pour la mise a jour du traitement du profil '||v_profil||'.';
+     return;
+  end if;
+
+  if f_is_modifiable(v_expb,v_sec_id)<>1 then
+     p_etat:=0;
+     p_erreur:='Le statut actuel du projet de budget ne permet pas la mise a jour des traitements des profils.';
+     return;
+  end if;
+
+  update tb_traitement_agent set TRTAG_MONT=p_mont, TRTAG_TEXTE_REF=P_TEXTE_REF, TRTAG_OBS=P_OBS,
+                                    TRTAG_FONCACT_ID_MODIF=p_acteur, TRTAG_DATE_MODIF=sysdate
+                                    where TRTAG_ID=p_trait;
+
+  p_etat:=1;
+  Exception
+    when others then
+          p_etat:=0;
+          p_erreur:=sqlerrm;
+end p_maj_trait_profil;
+----------------------------------------------------------------------------------------------------------
+
+END PK4_ELAB_TRAITEMENT_AGENT;

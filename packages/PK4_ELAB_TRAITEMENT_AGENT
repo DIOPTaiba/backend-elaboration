@@ -1,0 +1,63 @@
+CREATE OR REPLACE
+PACKAGE PK4_ELAB_TRAITEMENT_AGENT AS
+
+  function f_next_id return number;
+procedure P_DESC_AGENT(p_mat varchar2, p_nom out varchar2, p_prenom out varchar2, p_emploi out number);
+function f_ptil_modifier(p_expb varchar, p_mat varchar2, p_acteur varchar2) return number ;
+FUNCTION F_IS_MODIFIABLE(pexpb varchar2, p_sec varchar2) return number ;
+
+procedure p_maj_par_nat_eco(p_expb varchar,
+                          p_sec varchar2,
+                          p_mat varchar2,
+                          p_profil number,
+                          p_nat number,
+                          p_mont number,
+                          P_TEXTE_REF varchar2,
+                          P_OBS varchar2,
+                          p_acteur varchar2,
+                          p_etat out number,
+                          p_erreur out varchar2
+                          );
+----procedures pour la gestion des traitements des agents
+procedure p_insert_trait_agent(p_trait out number,
+                          p_expb varchar,
+                          p_mat varchar2,
+                          p_nat number,
+                          p_mont number,
+                          P_TEXTE_REF varchar2,
+                          P_OBS varchar2,
+                          p_acteur varchar2,
+                          p_etat out number,
+                          p_erreur out varchar2
+                          ) ;
+procedure p_maj_trait_agent(p_trait number,
+                          p_mont number,
+                          P_TEXTE_REF varchar2,
+                          P_OBS varchar2,
+                          p_acteur varchar2,
+                          p_etat out number,
+                          p_erreur out varchar2
+                          ) ;
+------------------------------------------------------------------
+----procedures pour la gestion des traitements des profils
+procedure p_insert_trait_profil(p_trait out number,
+                          p_expb varchar,
+                          p_profil varchar2,
+                          p_nat number,
+                          p_mont number,
+                          P_TEXTE_REF varchar2,
+                          P_OBS varchar2,
+                          p_acteur varchar2,
+                          p_etat out number,
+                          p_erreur out varchar2
+                          );
+procedure p_maj_trait_profil(p_trait number,
+                          p_mont number,
+                          P_TEXTE_REF varchar2,
+                          P_OBS varchar2,
+                          p_acteur varchar2,
+                          p_etat out number,
+                          p_erreur out varchar2
+                          );
+
+END PK4_ELAB_TRAITEMENT_AGENT;

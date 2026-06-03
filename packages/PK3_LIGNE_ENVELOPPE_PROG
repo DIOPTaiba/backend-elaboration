@@ -1,0 +1,113 @@
+create or replace PACKAGE PK3_LIGNE_ENVELOPPE_PROG AS
+
+function f_ptil_saisir (p_expb varchar2, p_foncact varchar2,
+                        p_prog varchar2, p_cade varchar2) return number;
+------------------------------------------------------------------------------------------------------------------------------
+function f_get_levp_num(p_pro_id in tb_programme.pro_id%type,
+                        p_vers_code in tb_version_sec.vers_code%type,
+                        p_cade_code in tb_categorie_depense.cade_code%type) return tb_ligne_enveloppe_prog.levp_num%type;
+------------------------------------------------------------------------------------------------------------------------------
+  PROCEDURE p_insertion(p_LEVP_NUM out tb_ligne_enveloppe_prog.levp_num%TYPE, p_LEVP_CADE_CODE in tb_ligne_enveloppe_prog.LEVP_CADE_CODE%TYPE,
+            p_LEVP_MONT_1 in tb_ligne_enveloppe_prog.LEVP_MONT_1%TYPE,
+            p_LEVP_MONT_2 in tb_ligne_enveloppe_prog.LEVP_MONT_2%TYPE,
+            p_LEVP_MONT_3 in tb_ligne_enveloppe_prog.LEVP_MONT_3%TYPE,
+            p_LEVP_CONT_1 in tb_ligne_enveloppe_prog.LEVP_CONT_1%TYPE,
+            p_LEVP_CONT_2 in tb_ligne_enveloppe_prog.LEVP_CONT_2%TYPE,
+            p_LEVP_CONT_3 in tb_ligne_enveloppe_prog.LEVP_CONT_3%TYPE,
+            p_LEVP_ENVP_CODE in tb_ligne_enveloppe_prog.LEVP_ENVP_CODE%TYPE,
+            p_LEVP_CUMUL_MONT in tb_ligne_enveloppe_prog.LEVP_CUMUL_MONT%TYPE,
+            p_LEVP_CUMUL_CONT_COP_1 in tb_ligne_enveloppe_prog.LEVP_CUMUL_CONT_COP_1%TYPE,
+            p_LEVP_CUMUL_CONT_COP_2 in tb_ligne_enveloppe_prog.LEVP_CUMUL_CONT_COP_2%TYPE,
+            p_LEVP_CUMUL_CONT_COP_3 in tb_ligne_enveloppe_prog.LEVP_CUMUL_CONT_COP_3%TYPE,
+            p_LEVP_BUD_CP in tb_ligne_enveloppe_prog.LEVP_BUD_CP%TYPE,
+            p_LEVP_CUMUL_PRJECT_1 in tb_ligne_enveloppe_prog.LEVP_CUMUL_PRJECT_1%TYPE,
+            p_LEVP_CUMUL_PRJECT_2 in tb_ligne_enveloppe_prog.LEVP_CUMUL_PRJECT_2%TYPE,
+            p_LEVP_CUMUL_PRJECT_3 in tb_ligne_enveloppe_prog.LEVP_CUMUL_PRJECT_3%TYPE,
+            p_LEVP_LEVS_CODE in tb_ligne_enveloppe_prog.levp_levs_code%TYPE,
+            p_etat out boolean, p_erreur out varchar2);
+------------------------------------------------------------------------------
+PROCEDURE p_update_plafonds(P_LEVP_NUM number,
+                            P_CADE_CODE varchar2,
+                            P_MONT_1 number,
+                            P_MONT_2 number,
+                            P_MONT_3 number,
+                            P_MONT_AE_1 number,
+                            P_MONT_AE_2 number,
+                            P_MONT_AE_3 number,
+                            p_FONCACT varchar2,
+                            p_etat OUT BOOLEAN,
+                            p_erreur OUT VARCHAR2);
+------------------------------------------------------------------------------------------------------------------------------
+PROCEDURE p_modifier(p_LEVP_NUM in tb_ligne_enveloppe_prog.levp_num%TYPE,
+            p_LEVP_MONT_1 in tb_ligne_enveloppe_prog.LEVP_MONT_1%TYPE,
+            p_LEVP_MONT_2 in tb_ligne_enveloppe_prog.LEVP_MONT_2%TYPE,
+            p_LEVP_MONT_3 in tb_ligne_enveloppe_prog.LEVP_MONT_3%TYPE,
+            p_etat out varchar,
+            p_erreur out varchar);
+------------------------------------------------------------------------------------------------------------------------------
+PROCEDURE p_mont_triennale(p_levp varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number);
+--------------------------------------------------------------------------------------------------
+PROCEDURE p_mont_env(p_levp varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number,
+                           p_mont_n1_ae out number,
+                           p_mont_n2_ae out number,
+                           p_mont_n3_ae out number);
+------------------------------------------------------------------------------------------------------------------------------
+PROCEDURE p_mont_triennale(p_version_sec varchar2,
+                           p_prog varchar2,
+                           p_categ varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number);
+--------------------------------------------------------------------------------------------------
+PROCEDURE p_mont_env(p_exe varchar2,
+                           p_sec_id varchar2,
+                           p_prog varchar2,
+                           p_categ varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number,
+                           p_mont_n1_ae out number,
+                           p_mont_n2_ae out number,
+                           p_mont_n3_ae out number);
+------------------------------------------------------------------------------------------------------------
+ PROCEDURE p_mont_env(p_exe varchar2,
+                           p_sec_id varchar2,
+                           p_prog varchar2,
+                           p_categ varchar2,
+                           psfin_code varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number,
+                           p_mont_n1_ae out number,
+                           p_mont_n2_ae out number,
+                           p_mont_n3_ae out number);
+------------------------------------------------------------------------------------------------------------------------------
+function f_env_annuelle(p_expb_code varchar2, p_levp varchar2, p_annee number) return number;
+------------------------------------------------------------------------------------------------------------------------------
+PROCEDURE p_montant_env_precedente(
+   p_prog in varchar2
+  ,p_section in varchar2
+  ,p_vers_code in varchar2
+  ,p_cade_code in varchar2
+  ,p_LEVP_MONT_1 out tb_ligne_enveloppe_prog.LEVP_MONT_1%TYPE
+  ,p_LEVP_MONT_2 out tb_ligne_enveloppe_prog.LEVP_MONT_2%TYPE
+  ,p_LEVP_MONT_3 out tb_ligne_enveloppe_prog.LEVP_MONT_3%TYPE);
+
+  FUNCTION p_env_prog_par_cade(p_prog in varchar2
+                                ,p_section in varchar2
+                               ,p_cade_code in varchar2) return number;
+-------------------------------------------------------------------------------------------------
+function f_montant_CP_SECTION(P_LEVS_CODE in tb_ligne_enveloppe_prog.levp_levs_code%type,
+   p_vers_code in tb_enveloppe_prog.envp_vers_code%type) return number ;
+-----------------------------------------------------------------------------------------
+function f_montant_env_SECTION(p_vers_code in tb_enveloppe_prog.envp_vers_code%type) return number ;
+END PK3_LIGNE_ENVELOPPE_PROG;
+
+
+

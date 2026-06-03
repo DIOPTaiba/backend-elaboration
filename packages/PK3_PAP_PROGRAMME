@@ -1,0 +1,90 @@
+create or replace PACKAGE PK3_PAP_PROGRAMME AS
+
+  FUNCTION f_next_code RETURN varchar2;
+------------------------------------------------------------------------------------------------------------------
+function f_ptil_saisir_resa(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_saisir_cmtaire(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number;
+function f_ptil_transmettre_resa(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_transmettre_pap(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_creer_budcomp(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number;
+function f_ptil_valider_resa(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number;
+--------------------------------------------------------------------------------------------------------------------
+Function f_is_papp_valide(p_papp varchar2) return number;
+function get_papp_prec(p_papp varchar2) return varchar2;
+procedure f_rejet_pap(p_papp varchar2, p_foncact varchar2, P_ETAT out number, P_ERREUR out varchar2);
+------------------------------------------------------------------------------------------------
+procedure p_insert_pap(P_PAPP_REF out varchar2,
+                      P_DPPD_REF varchar2,
+                      P_VERS_CODE varchar2,
+                      P_PRO_ID varchar2,
+                      p_expb_code varchar2,
+                      p_FONCACT_ID varchar2,
+                      p_etat out number,
+                      p_erreur out varchar2);
+------------------------------------------------------------------------------------------------
+procedure p_insert_revision(P_PAPP varchar2,
+                            P_VERS_CODE varchar2,
+                            p_motif varchar2,
+                            p_FONCACT_ID varchar2,
+                            P_RPAPP out varchar2,
+                            p_etat out number,
+                            p_erreur out varchar2);
+function f_validation_pap_dppd(p_dppd varchar2, p_foncact varchar2, P_ERREUR out varchar2) return number;
+------------------------------------------------------------------------------------------------------------------
+FUNCTION f_get_varchar(p_PAPP_REF in tb_pap_programme.papp_ref%TYPE,
+                       p_NOM_CHAMP in VARCHAR2) Return VARCHAR2;
+------------------------------------------------------------------------------------------------------------------
+  PROCEDURE p_insertion(p_papp_ref out tb_pap_programme.papp_ref%TYPE, p_papp_vers_code in tb_pap_programme.papp_vers_code%TYPE,
+            p_papp_sec_id in tb_pap_programme.papp_sec_id%TYPE,
+            p_papp_pro_id in tb_pap_programme.papp_pro_id%TYPE,
+            p_papp_dppd_ref in tb_pap_programme.papp_dppd_ref%TYPE,
+            p_papp_expb_code in tb_pap_programme.papp_expb_code%TYPE,
+            p_papp_foncact_id in tb_pap_programme.papp_foncact_id%TYPE,
+            p_etat out boolean, p_erreur out varchar2);
+--------------------------------------------------------------------------------------------------
+PROCEDURE p_evol_credits_saisie(p_version_sec varchar2,
+                           p_prog varchar2,
+                           p_categ varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number);
+--------------------------------------------------------------------------------------------------
+PROCEDURE p_credits_saisie(p_exe varchar2,
+                           p_sec_id varchar2,
+                           p_prog varchar2,
+                           p_categ varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number,
+                           p_mont_n1_ae out number,
+                           p_mont_n2_ae out number,
+                           p_mont_n3_ae out number);
+--------------------------------------------------------------------------------------------------
+PROCEDURE p_credits_saisie(p_exe varchar2,
+                           p_sec_id varchar2,
+                           p_prog varchar2,
+                           p_categ varchar2,
+                           p_sfin_code varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number,
+                           p_mont_n1_ae out number,
+                           p_mont_n2_ae out number,
+                           p_mont_n3_ae out number);
+--------------------------------------------------------------------------------------------------
+PROCEDURE p_evol_credits(p_version_sec varchar2,
+                           p_prog varchar2,
+                           p_categ varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number);
+
+--------------------------------------------------------------------------------------------------
+PROCEDURE p_prise_en_compte_activite(p_COP_ID IN tb_comp_prog.cop_id%TYPE,  p_COP_PPTIP_ID in tb_comp_prog.cop_pptip_id%TYPE, p_prog_id in tb_comp_prog.cop_pro_id%TYPE, p_etat out boolean, p_erreur out varchar2);
+
+END PK3_PAP_PROGRAMME;
+
+

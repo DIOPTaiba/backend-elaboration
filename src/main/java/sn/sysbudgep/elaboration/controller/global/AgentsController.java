@@ -25,7 +25,7 @@ public class AgentsController {
 
     // Tous les agents par chapitre ou un seul agent si matricule est renseigné
     @PostMapping(value = "")
-    public List<Agents> montantsAECPLigne(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
+    public List<Agents> agents(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
         return agentsService.agents(pr);
     }
 

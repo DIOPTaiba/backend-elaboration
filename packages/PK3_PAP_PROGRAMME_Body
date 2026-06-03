@@ -1,0 +1,1068 @@
+create or replace PACKAGE BODY PK3_PAP_PROGRAMME AS
+  FUNCTION f_next_code RETURN varchar2 AS
+    --  a  partir de la version ministerielle retrouver EXPB_EXE dans la table tb_exercice_projet_bud
+    cursor c_code is select max(substr(papp_ref, 5)) from tb_pap_programme;
+    v_code varchar2(10);
+    v_max number;
+    begin
+      open c_code;
+      fetch c_code into v_max;
+      close c_code;
+      v_max:=nvl(v_max,0)+1;
+      v_code:='PAP-'||lpad(v_max,4,'0');
+      return v_code;
+  END f_next_code;
+-----------------------------------------------------------------------------------------------------------
+FUNCTION f_next_code (p_expb_code varchar2) RETURN varchar2 is
+    --  a  partir de la version ministerielle retrouver EXPB_EXE dans la table tb_exercice_projet_bud
+  CURSOR c_code is select max(to_number(substr(PAPP_REF, 7))) from tb_pap_programme
+              where substr(papp_ref,1,6)='PAPP'||substr(P_EXPB_CODE,3,2);
+--    cursor c_code is select max(substr(papp_ref, 5)) from tb_pap_programme;
+    v_code varchar2(10);
+    v_max number;
+    begin
+      open c_code;
+      fetch c_code into v_max;
+      close c_code;
+      v_max:=nvl(v_max,0)+1;
+      v_code:='PAPP'||substr(P_EXPB_CODE,3,2)||lpad(v_max,4,'0');
+      return v_code;
+  END f_next_code;
+  ----------------------------------------------------------------------------------------------------
+function F_NEXT_REV_PAPP(p_vers varchar2) return varchar2 is
+  cursor c_verif is select 'X' from tb_version_sec where vers_code=p_vers;
+  cursor c_rev_papp is select max(to_number(substr(rpapp_code,8))) from tb_revision_papp
+         where rpapp_vers_code=p_vers;
+  v_max number;
+  v_verif varchar2(1);
+  begin
+    if p_vers is null then
+       return null;
+    end if;
+
+    open c_verif;
+    fetch c_verif into v_verif;
+    if c_verif%notfound then
+       close c_verif;
+       return null;
+    else
+       close c_verif;
+       open c_rev_papp;
+       fetch c_rev_papp into v_max;
+       close c_rev_papp;
+       v_max:=nvl(v_max,0)+1;
+       return p_vers||lpad(v_max,3,'0');
+     end if;
+  end;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_saisir_resa(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number is
+  --renvoie 1 si pour un Programme donne, l'acteur peut saisir ou modifier les resultats attendus, renvoie 0 sinon
+begin
+  return 1; --a enlever
+  return PK3_PRIVILEGE_PPPB.f_get_priv_sur_prog(p_expb, p_foncact, p_prog, null, 'PPPB14');
+end f_ptil_saisir_resa;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_saisir_cmtaire(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number is
+  /*--renvoie 1 si pour un Programme donne, l'acteur peut saisir ou modifier les commentaires du PAP, renvoie 0 sinon
+    */
+begin
+  return 1; --a enlever
+  --return PK3_PRIVILEGE_PPPB.f_get_priv_sur_prog(p_expb, p_foncact, p_prog, null, 'PPPB14');
+end f_ptil_saisir_cmtaire;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_transmettre_resa(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number is
+  --renvoie 1 si pour un Programme donne, l'acteur peut saisir ou modifier les resultats attendus, renvoie 0 sinon
+begin
+  return PK3_PRIVILEGE_PPPB.f_get_priv_sur_prog(p_expb, p_foncact, p_prog, null, 'PPPB15');
+end f_ptil_transmettre_resa;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_transmettre_pap(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number is
+  /*--renvoie 1 si pour un Programme donne, l'acteur peut soumettre le PAP pour validation, renvoie 0 sinon*/
+begin
+ -- return 1; --a enlever
+  return PK3_PRIVILEGE_PPPB.f_get_priv_sur_prog(p_expb, p_foncact, p_prog, null, 'PPPB17');
+end f_ptil_transmettre_pap;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_creer_budcomp(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number is
+  /*--renvoie 1 si pour un Programme donne, l'acteur peut creer un budget de composante de programme
+   renvoie 0 sinon la valeur 1 indique egalement que l'acteur peut autoriser la revision d'un budget deja valide*/
+begin
+  return 1;
+  --return PK3_PRIVILEGE_PPPB.f_get_priv_sur_prog(p_expb, p_foncact, p_prog, null, 'PPPB16');
+end f_ptil_creer_budcomp;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_valider_resa(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number is
+  --renvoie 1 si pour un Programme donne, l'acteur peut valider les resultats attendus, renvoie 0 sinon
+begin
+  return PK3_PRIVILEGE_PPPB.f_get_priv_sur_prog(p_expb, p_foncact, p_prog, null, 'PPPB16');
+end f_ptil_valider_resa;
+--------------------------------------------------------------------------------------------------------------------
+Function f_is_papp_valide(p_papp varchar2) return number is
+/*cette fonction renvoie 1 si le PAPP est valide, 0 sinon*/
+  cursor c_recherche is select papp_stat_cod from tb_pap_programme where papp_ref=p_papp;
+  v_val varchar2(10);
+begin
+  open c_recherche;
+  fetch c_recherche into v_val;
+  close c_recherche;
+
+  if v_val in ('PAPP_1T', 'PAPP_2V') then
+     return 1;
+  else
+     return 0;
+  end if;
+
+end f_is_papp_valide;
+--------------------------------------------------------------------------------------------------------------------
+Function f_is_papp_a_valider(p_papp varchar2) return number is
+/*cette fonction renvoie 1 si le PAPP est a valider, 0 sinon*/
+  cursor c_recherche is select papp_stat_cod from tb_pap_programme where papp_ref=p_papp;
+  v_val varchar2(10);
+begin
+  open c_recherche;
+  fetch c_recherche into v_val;
+  close c_recherche;
+
+  if v_val='PAPP_1T' then
+     return 1;
+  else
+     return 0;
+  end if;
+
+end f_is_papp_a_valider;
+--------------------------------------------------------------------------------------------------------------------
+Function f_is_papp_a_transmettre(p_papp varchar2) return number is
+/*cette fonction renvoie 1 si le PAPP est a valider, 0 sinon*/
+  cursor c_recherche is select papp_stat_cod from tb_pap_programme where papp_ref=p_papp;
+  v_val varchar2(10);
+begin
+  open c_recherche;
+  fetch c_recherche into v_val;
+  close c_recherche;
+
+  if v_val in ('PAPP_0I', 'PAPP_2D') then
+     return 1;
+  else
+     return 0;
+  end if;
+
+end f_is_papp_a_transmettre;
+-----------------------------------------------------------------------------------------------------------------
+function get_papp_prec(p_papp varchar2) return varchar2 is
+/*Pour un pap de programme donnee, cette fonction renvoie le code du pap precedent*/
+
+  cursor c_pap_courant is select papp_dppd_ref, papp_pro_id
+         from tb_pap_programme where papp_ref=p_papp;
+
+  v_dppd_ref varchar2(10);
+  --v_vers_code varchar2(10);
+  v_pro_id varchar2(10);
+
+  --retrouver le PAP d'avant
+  cursor c_papp_prec(p_dppd_code_prec varchar2, p_pro_id varchar2) is
+          select papp_ref from tb_pap_programme
+          where papp_dppd_ref=p_dppd_code_prec and papp_pro_id=p_pro_id;
+
+  v_code_dppd_prec varchar2(10);
+  v_papp_prec varchar2(10);
+
+  begin
+    open c_pap_courant;
+    fetch c_pap_courant into v_dppd_ref, v_pro_id;
+    if c_pap_courant%notfound then
+       close c_pap_courant;
+       return null;
+    end if;
+    close c_pap_courant;
+
+    v_code_dppd_prec:=pk3_dppd.get_dppd_prec(v_dppd_ref);
+
+    if v_code_dppd_prec is null then --cas ou le DPPD precedent est null
+       return null;
+    else
+       open c_papp_prec(v_code_dppd_prec,v_pro_id);
+        fetch c_papp_prec into v_papp_prec;
+        close c_papp_prec;
+        return v_papp_prec;
+    end if;
+end get_papp_prec;
+------------------------------------------------------------------------------------------------
+procedure p_insert_pap(P_PAPP_REF out varchar2,
+                      P_DPPD_REF varchar2,
+                      P_VERS_CODE varchar2,
+                      P_PRO_ID varchar2,
+                      p_expb_code varchar2,
+                      p_FONCACT_ID varchar2,
+                      p_etat out number,
+                      p_erreur out varchar2) is
+   /*version plus complete*/
+
+  cursor c_verif is select dppd_sec_id from tb_dppd
+                 where dppd_ref=p_dppd_ref and dppd_expb_code=p_expb_code;
+
+v_PAPP_REF varchar2(10);
+v_rpapp_code varchar2(10);
+v_sec_id varchar2(10);
+begin
+  open c_verif;
+  fetch c_verif into v_sec_id;
+  if c_verif%notfound then
+     p_etat:=0;
+     p_erreur:='La reference du DPPD n''est pas valide.' ;
+     return;
+  end if;
+
+         --insertion du dppd
+  v_papp_ref:=F_NEXT_CODE(p_EXPB_CODE);
+  insert into tb_pap_programme(papp_ref, papp_vers_code, papp_sec_id, papp_stat_cod,
+                               papp_pro_id, papp_dppd_ref, papp_expb_code,
+                               papp_foncact_id, papp_date)
+                    values(v_papp_ref, p_vers_code, v_sec_id, 'PAPP_0I',
+                    p_pro_id, p_dppd_ref, p_expb_code,
+                    p_foncact_id, sysdate);
+
+  --inserer la revision
+  p_insert_revision(v_papp_ref, P_VERS_CODE, 'PAP Programme nouvellement cree',
+                    p_FONCACT_ID, v_rpapp_code, p_etat, p_erreur);
+  if p_etat=0 then
+     return;
+  end if;
+
+  --mettre a jour la revision du PAPP
+  update tb_pap_programme set papp_rpapp_code=v_rpapp_code where papp_ref=v_PAPP_REF;
+
+  --insertion de la position du dppd
+ /* insert into tb_pos_dppd (PDPPD_NUM, PDPPD_DPPD_REF, PDPPD_STAT_COD, PDPPD_VERS_CODE,
+                           PDPPD_RDPPD_CODE, PDPPD_FONCACT_ID, PDPPD_DATE)
+                   values (PDPPD_NUM_SEQ.NEXTVAL, v_DPPD_REF, 'DPPD_0I', P_VERS_CODE,
+                           v_rdppd_code, p_FONCACT_ID, sysdate);  */
+
+  p_etat:=1;
+  P_PAPP_REF:=v_PAPP_REF;
+  exception
+    when others then
+    rollback;
+    p_etat:=0;
+    p_erreur:=SQLERRM;
+    P_PAPP_REF:=null;
+end p_insert_pap;
+------------------------------------------------------------------------------------------------
+procedure p_insert_revision(P_PAPP varchar2,
+                            P_VERS_CODE varchar2,
+                            p_motif varchar2,
+                            p_FONCACT_ID varchar2,
+                            P_RPAPP out varchar2,
+                            p_etat out number,
+                            p_erreur out varchar2) is
+
+   cursor c_verif_papp is select papp_pro_id from tb_pap_programme where papp_ref=p_papp;
+
+   V_PRO_ID varchar2(10);
+   v_RPAPP varchar2(10);
+begin
+  open c_verif_papp;
+  fetch c_verif_papp into v_pro_id;
+  if c_verif_papp%notfound then
+     close c_verif_papp;
+     p_etat:=0;
+     p_erreur:='La reference du PAPP ('||p_papp||') n''est pas valide';
+     return;
+  end if;
+
+          --insertion de la revision du papp
+  v_rpapp:=F_NEXT_REV_PAPP(p_vers_CODE);
+  if  v_rpapp is null then
+     p_etat:=0;
+     p_erreur:='La version de la section n''est pas correcte et ne peut etre revisee.';
+     return;
+  end if;
+
+  insert into tb_revision_papp (RPAPP_CODE, RPAPP_VERS_CODE, RPAPP_PRO_ID, rpapp_papp_ref,
+                               RPAPP_MOTIF, RPAPP_FONCACT_ID, RPAPP_DATE)
+               values (v_RPAPP, P_VERS_CODE, V_PRO_ID, p_papp,
+                       p_motif, p_FONCACT_ID, sysdate);
+
+  p_etat:=1;
+  P_RPAPP:=v_RPAPP;
+  exception
+    when others then
+    rollback;
+    p_etat:=0;
+    p_erreur:=SQLERRM;
+    P_RPAPP:=null;
+end p_insert_revision;
+---------------------------------------------------------------------------------------------------------------
+procedure f_rejet_pap(p_papp varchar2, p_foncact varchar2, P_ETAT out number, P_ERREUR out varchar2) IS
+  begin
+      UPDATE TB_PAP_PROGRAMME SET papp_stat_cod = 'PAPP_2D',
+      papp_foncact_id = p_foncact
+      WHERE papp_ref = p_papp;
+      P_ETAT := 0;
+      P_ERREUR := 'Rejet effectue';
+  EXCEPTION
+   when others then
+       P_ERREUR  := Sqlerrm;
+       P_ETAT := 1;
+END f_rejet_pap;
+
+--------------------------------------------------------------------------------------------------------------------
+function f_validation_pap_dppd(p_dppd varchar2, p_foncact varchar2, P_ERREUR out varchar2) return number IS
+  begin
+      UPDATE TB_PAP_PROGRAMME SET papp_stat_cod = 'PAPP_3V',
+      papp_foncact_id = p_foncact
+      WHERE papp_dppd_ref = p_dppd;
+      P_ERREUR := 'Validation effectuee';
+      return 0;
+  EXCEPTION
+   when others then
+       P_ERREUR  := Sqlerrm;
+       return 1;
+END f_validation_pap_dppd;
+------------------------------------------------------------------------------------------------------------------
+FUNCTION f_get_varchar(p_PAPP_REF in tb_pap_programme.papp_ref%TYPE,
+                       p_NOM_CHAMP in VARCHAR2) Return VARCHAR2
+IS
+v_VAL varchar2(1000);
+v_SQL varchar2(1000);
+BEGIN
+  v_SQL := 'SELECT '||p_NOM_CHAMP||' FROM tb_pap_programme WHERE PAPP_REF=:1';
+  EXECUTE IMMEDIATE v_SQL INTO v_VAL USING p_PAPP_REF;
+  RETURN(v_VAL);
+  EXCEPTION
+    WHEN OTHERS THEN
+			RETURN(NULL);
+END f_get_varchar;
+------------------------------------------------------------------------------------------------------------------
+  PROCEDURE p_insertion(p_papp_ref out tb_pap_programme.papp_ref%TYPE, p_papp_vers_code in tb_pap_programme.papp_vers_code%TYPE,
+            p_papp_sec_id in tb_pap_programme.papp_sec_id%TYPE,
+            p_papp_pro_id in tb_pap_programme.papp_pro_id%TYPE,
+            p_papp_dppd_ref in tb_pap_programme.papp_dppd_ref%TYPE,
+            p_papp_expb_code in tb_pap_programme.papp_expb_code%TYPE,
+            p_papp_foncact_id in tb_pap_programme.papp_foncact_id%TYPE,
+            p_etat out boolean, p_erreur out varchar2) AS
+
+            -- cursor pour recuperer la reference de la version globale
+            cursor c_version_sec is select vers_verg_code from tb_version_sec
+            where vers_code = p_papp_vers_code;
+            v_vers_verg_code varchar2(10);
+
+            -------------  cursor pour recuperer le numero de version et la reference de l'exercice a partir de la version globale
+            cursor c_version_globale(p_verg_code varchar2) is select verg_num, verg_expb_code from tb_version_globale
+            where verg_code = p_verg_code;
+            v_verg_num number(1);
+            v_verg_expb_code varchar2(10);
+            v_verg_num_prec number(1);
+
+            ---------- recuperation de la version globale precedente
+            cursor c_version_globale_prec(p_verg_expb_code varchar2, p_verg_num number) is select verg_code from tb_version_globale
+            where verg_expb_code = p_verg_expb_code
+            and verg_num = p_verg_num;
+            v_verg_code_prec varchar2(10);
+
+            --------- recuperation de la version ministerielle precente
+            cursor c_version_sec_prec(p_verg_code varchar2) is select vers_code from tb_version_sec
+            where vers_verg_code = p_verg_code
+            and vers_sec_id = p_papp_sec_id;
+            v_vers_code_prec varchar2(10);
+
+            ------------- recuperation du papa_programme precedent
+            cursor c_pap_programme_prec(p_papp_vers_code varchar2, p_prod_id varchar2) is select papp_ref
+            from tb_pap_programme
+            where papp_vers_code = p_papp_vers_code
+            and papp_pro_id = p_prod_id;
+            p_papp_ref_prec varchar2(10);
+
+           ------------- recuperation des resultats attendus precedents
+            cursor c_result_attendus_prec(p_papp_ref varchar2) is select resa_code, resa_obj_code, resa_foncact_id
+            from tb_result_attendus where resa_papp_ref = p_papp_ref;
+            p_resa_code varchar2(10);
+            v_new_resa_code varchar2(10);
+            p_resa_obj_code varchar2(10);
+            p_resa_foncact_id varchar2(10);
+
+            ---------------- recuperation des objectifs specifique du programme au cas ou nous somme sur la version preliminaire du budget
+            cursor c_objectif_specif is select obj_code from tb_objectif where obj_tob_id = 'OBS'
+                   and obj_pro_id = p_papp_pro_id;
+            p_obj_codeOBS varchar2(10);
+
+            ------------------  recuperation des indicateurs de resultat d'un objectif global
+            cursor c_indicateur_obj_specif(param_obj_code varchar2) is select ind_code from tb_indicateur where ind_obj_code = param_obj_code;
+            p_ind_codeOBS varchar2(10);
+
+            ------------- recuperation des projection_resultats precedentes
+            cursor c_projection_resultats_prec(p_pres_resa_code varchar2) is select pres_obj_code, pres_ind_code, pres_val_1,
+            pres_val_2, pres_val_3, pres_struc_id, pres_expb_code, pres_val_ref, pres_foncact_id
+            from tb_projection_resultats where
+            pres_resa_code = p_pres_resa_code;
+
+            p_pres_code varchar2(10);
+            p_pers_obj_code varchar2(10);
+            p_pers_ind_code varchar2(10);
+            p_pers_val_1 NUMBER(15);
+            p_pers_val_2 NUMBER(15);
+            p_pers_val_3 NUMBER(15);
+            p_pers_struc_id varchar2(10);
+            p_pers_expb_code varchar2(10);
+            p_pers_val_ref NUMBER(15);
+            p_pers_foncat_id varchar2(10);
+
+            --------------------------------- recuperation des TB_BUDGET_COMP precedent
+            cursor c_budget_comp_prec(p_papp_ref varchar2) is select BUDC_CODE, BUDC_VERS_CODE,
+            BUDC_COP_ID, BUDC_FONCACT_ID from TB_BUDGET_COMP where BUDC_PAPP_REF = p_papp_ref;
+            P_NEW__BUDC_CODE  varchar(12);
+            p_BUDC_CODE  varchar(12);
+            p_budc_vers_code varchar(10);
+            p_budc_cop_id varchar(10);
+            p_budc_foncact_id varchar(10);
+
+
+             --------------------------------- recuperation des TB_LIGNE_PROJECTION_COMP precedent
+            cursor c_ligne_projection_comp_prec(p_lpco_budc_code varchar2) is select LPCO_CODE, LPCO_CADE_CODE, LPCO_MONT_1, LPCO_MONT_2,
+            LPCO_MONT_3, LPCO_FONCACT_ID, LPCO_SFIN_CODE  from TB_LIGNE_PROJECTION_COMP where LPCO_BUDC_CODE = p_lpco_budc_code;
+            p_new_LPCO_CODE varchar(10);
+            p_LPCO_CODE varchar(10);
+            p_LPCO_CADE_CODE varchar(10);
+            p_LPCO_MONT_1 number(15);
+            p_LPCO_MONT_2 number(15);
+            p_LPCO_MONT_3 number(15);
+            p_LPCO_FONCACT_ID varchar(10);
+            p_LPCO_SFIN_CODE varchar(10);
+
+
+             --------------------------------- recuperation des TB_ECHEANCIER_CP precedent
+            cursor c_echeancier_cp_prec(p_ECHE_LBUC_CODE varchar2) is select ECHE_MONT, ECHE_LBUC_CODE, ECHE_ANNEE,
+            ECHE_FONCACT_ID  from TB_ECHEANCIER_CP where ECHE_LBUC_CODE = p_ECHE_LBUC_CODE;
+            p_new_ECHE_CODE varchar(10);
+            p_ECHE_MONT number(15);
+            p_ECHE_LBUC_CODE varchar(10);
+            p_ECHE_ANNEE number(15);
+            p_ECHE_FONCACT_ID varchar(10);
+
+
+             --------------------------------- recuperation des TB_LIGNE_BUDGET_COMP precedent
+            cursor c_LIGNE_BUDGET_COMP_prec(p_LBUC_BUDC_CODE varchar2) is select LBUC_CODE, LBUC_PRO_ID, LBUC_CHAP_ID, LBUC_DIF_ID,
+            LBUC_NAT_ID, LBUC_CP_1_PREC, LBUC_CP_1, LBUC_AE_1_PREC, LBUC_AE_ANT, LBUC_IMP_ID, LBUC_BUDC_CODE, LBUC_CHAP_CODE,
+            LBUC_IMP_CODE, LBUC_VERS_CODE, LBUC_CADE_CODE, LBUC_AE_1, LBUC_AE_1_TOT_CP, LBUC_FONCACT_ID, LBUC_EXPB_CODE,
+            LBUC_COP_ID, LBUC_SFIN_CODE
+            from TB_LIGNE_BUDGET_COMP where LBUC_BUDC_CODE = p_LBUC_BUDC_CODE;
+            v_LBUC_CODE varchar(10);
+            p_LBUC_PRO_ID varchar(10);
+            p_LBUC_CHAP_ID varchar(11);
+            p_LBUC_CLS_ID number(4);
+            p_LBUC_NAT_ID number(4);
+            p_LBUC_CP_1_PREC number(15);
+            p_LBUC_CP_1 number(15);
+            p_LBUC_AE_1_PREC number(15);
+            p_LBUC_AE_ANT number(15);
+            p_LBUC_IMP_ID number(4);
+            p_LBUC_BUDC_CODE varchar(10);
+            p_LBUC_CHAP_CODE varchar(14);
+            p_LBUC_IMP_CODE varchar(22);
+            p_LBUC_VERS_CODE varchar(10);
+            p_LBUC_CADE_CODE varchar(8);
+            p_LBUC_AE_1 number(15);
+            p_LBUC_AE_1_TOT_CP number(15);
+            p_LBUC_FONCACT_ID varchar(10);
+            p_LBUC_EXPB_CODE varchar(10);
+            p_LBUC_COP_ID varchar(10);
+            p_LBUC_SFIN_CODE  varchar(10);
+
+            P_NEW_LBUC_CODE varchar(10);
+
+            v_papp_ref varchar2(10);
+
+
+            cursor c_all_composante_programmable(p_prog_ID varchar2) is select COP_ID, COP_PPTIP_ID
+            from tb_comp_prog t where PK3_COMPOSANTE_PROG.F_EST_A_PROGRAMMER(t.cop_id) = 1
+            and COP_PRO_ID = p_prog_ID;
+
+            p_COP_ID varchar(10);
+            p_COP_PPTIP_ID varchar(20);
+
+
+            cursor c_all_source_fin is select sfin_code from tb_source_fin;
+
+            cursor c_categ_depense_prg is select CADE_CODE from tb_categorie_depense
+            where CADE_COMP2 =1;
+
+            v_cade_code varchar2(8);
+
+
+           cursor c_ligne_chapitre(p_COP_ID varchar2) is select tlc.LCHAP_CHAP_ID,  tcl.cc_cls_id, tlc.lchap_nat_id,
+              tch.chap_code, tlc.lchap_cade_code,
+              tch.chap_sec_id, ts.SEC_CODE, tp.PRO_CODE, tf.DIF_CODE, tn.NAT_CODE
+              from tb_ligne_chapitre tlc, tb_comp_prog tc, tb_chap_classe tcl,
+              tb_chapitre tch, tb_section ts, tb_programme tp, tb_dim_fonct tf, tb_nature_eco tn
+              where tlc.lchap_cop_id = tc.cop_id
+              and tlc.LCHAP_CHAP_ID = tcl.cc_chap_id
+              and tlc.LCHAP_CHAP_ID = tch.CHAP_ID
+              and tch.CHAP_SEC_ID = ts.SEC_ID
+              and tc.COP_PRO_ID = tp.PRO_ID
+              and tcl.cc_cls_id = tf.DIF_ID
+              and tlc.lchap_nat_id = tn.NAT_ID
+              and tc.cop_id = p_COP_ID;
+
+              v_LCHAP_CHAP_ID VARCHAR2(11);
+              v_cc_cls_id NUMBER(4);
+              v_lchap_nat_id VARCHAR2(11);
+              v_chap_code VARCHAR2(14);
+              v_lchap_cade_code VARCHAR2(8);
+              v_chap_sec_id VARCHAR2(10);
+              v_SEC_CODE VARCHAR2(2);
+              v_PRO_CODE VARCHAR2(6);
+              P_IMP_ID  NUMBER(8);
+              P_LBUC_CODE VARCHAR2(10);
+              v_DIF_CODE VARCHAR2(4);
+              v_NAT_CODE VARCHAR2(4);
+              v_indic_op number;
+  BEGIN
+  p_insert_pap(v_papp_ref,
+               p_papp_dppd_ref,
+               p_papp_vers_code,
+               p_papp_pro_id,
+               p_papp_expb_code,
+               p_papp_foncact_id,
+               v_indic_op,
+               p_erreur) ;
+
+  if v_indic_op=0 then
+     p_etat:=false;
+     return;
+  end if;
+  /*
+    v_papp_ref := f_next_code;
+    p_papp_ref := v_papp_ref;
+    p_etat := true;
+
+    insert into tb_pap_programme(papp_ref, papp_vers_code, papp_sec_id, papp_stat_cod, papp_pro_id, papp_dppd_ref,
+          papp_expb_code, papp_foncact_id, papp_date)
+    values(v_papp_ref, p_papp_vers_code, p_papp_sec_id, 'PAPP_0I', p_papp_pro_id, p_papp_dppd_ref, p_papp_expb_code, p_papp_foncact_id, sysdate);
+   */
+    -- recuperons la version ministerielle precedente et le numero de la version globale
+    open c_version_sec;
+    fetch c_version_sec into v_vers_verg_code;
+    close c_version_sec;
+    if(v_vers_verg_code is not null) then
+          open c_version_globale(v_vers_verg_code);
+          fetch c_version_globale into v_verg_num, v_verg_expb_code;
+          close c_version_globale;
+          if(v_verg_num > 1)then
+              v_verg_num_prec := v_verg_num -1;
+              open c_version_globale_prec(v_verg_expb_code, v_verg_num_prec);
+              fetch c_version_globale_prec into v_verg_code_prec;
+              close c_version_globale_prec;
+              if(v_verg_code_prec is not null) then
+                  -- recuperer la version ministerielle precedente
+                  open c_version_sec_prec(v_verg_code_prec);
+                  fetch c_version_sec_prec into v_vers_code_prec;
+                  close c_version_sec_prec;
+                  if(v_vers_code_prec is not null) then
+                           open c_pap_programme_prec(v_vers_code_prec, p_papp_pro_id);
+                           fetch c_pap_programme_prec into p_papp_ref_prec;
+                           close c_pap_programme_prec;
+                              if(p_papp_ref_prec is not null) then
+                                     open c_result_attendus_prec(p_papp_ref_prec);
+                                       loop
+                                          fetch c_result_attendus_prec into p_resa_code, p_resa_obj_code, p_resa_foncact_id;
+                                          exit when c_result_attendus_prec%notfound;
+                                            pk3_result_attendus.p_insertion(v_new_resa_code, v_papp_ref,
+                                                        p_papp_dppd_ref,p_resa_obj_code,p_resa_foncact_id,p_etat, p_erreur);
+                                                        if(p_etat = true) then
+                                                            open c_projection_resultats_prec(p_resa_code);
+                                                             loop
+                                                                fetch c_projection_resultats_prec into p_pers_obj_code, p_pers_ind_code, p_pers_val_1,
+                                                                      p_pers_val_2, p_pers_val_3, p_pers_struc_id, p_pers_expb_code, p_pers_val_ref, p_pers_foncat_id;
+                                                                exit when c_projection_resultats_prec%notfound and p_etat;
+                                                                  PK3_PROJECTION_RESULTATS.p_insertion(p_pres_code, p_pers_obj_code, p_pers_ind_code,
+                                                                      p_pers_val_1, p_pers_val_2, p_pers_val_3, p_pers_struc_id, v_new_resa_code, p_pers_expb_code,
+                                                                      p_pers_val_ref, p_pers_foncat_id, p_etat, p_erreur);
+                                                             end loop;
+                                                             close c_projection_resultats_prec;
+                                                        else
+                                                          P_ETAT := false;
+                                                          P_ERREUR  := 'Erreur lors de l''insertion des resultats attendus';
+                                                          p_papp_ref := '';
+                                                        end if;
+
+                                       end loop;
+                                     close c_result_attendus_prec;
+
+                                     ------------------------------------------------------------  budget_comp  precedents
+
+                                     open c_budget_comp_prec(p_papp_ref_prec);
+                                       loop
+                                          fetch c_budget_comp_prec into p_BUDC_CODE, p_budc_vers_code , p_budc_cop_id, p_budc_foncact_id;
+                                          exit when c_budget_comp_prec%notfound;
+                                            pk3_budget_comp.p_insertion(P_NEW__BUDC_CODE, p_papp_vers_code, v_papp_ref, 'BUDC_1S', p_budc_cop_id, p_budc_foncact_id,
+                                            p_papp_expb_code,p_etat, p_erreur);
+                                                    if(p_etat = true) then
+                                                            open c_ligne_projection_comp_prec(p_BUDC_CODE);
+                                                             loop
+                                                                fetch c_ligne_projection_comp_prec into p_LPCO_CODE, p_LPCO_CADE_CODE, p_LPCO_MONT_1,
+                                                                      p_LPCO_MONT_2, p_LPCO_MONT_3, p_LPCO_FONCACT_ID, p_LPCO_SFIN_CODE;
+                                                                exit when c_ligne_projection_comp_prec%notfound and p_etat;
+                                                                  pk3_ligne_projection_comp.p_insertion(p_new_LPCO_CODE, p_LPCO_CADE_CODE, 0,
+                                                                  p_LPCO_MONT_2, p_LPCO_MONT_3, P_NEW__BUDC_CODE, p_LPCO_FONCACT_ID, P_LPCO_SFIN_CODE, p_budc_cop_id,
+                                                                  p_etat, p_erreur);
+                                                                   if(p_etat = false) then
+                                                                        p_erreur := 'Erreur lors de l''insertion des lignes de projections de la version precedente';
+                                                                        p_papp_ref := '';
+                                                                        return;
+                                                                   end if;
+
+                                                             end loop;
+                                                             close c_ligne_projection_comp_prec;
+
+                                                             -------------------------  ligne budget composante de la version precedente  -------------------------------
+                                                             open c_LIGNE_BUDGET_COMP_prec(p_BUDC_CODE);
+                                                             loop
+                                                                fetch c_LIGNE_BUDGET_COMP_prec into v_LBUC_CODE, p_LBUC_PRO_ID, p_LBUC_CHAP_ID, p_LBUC_CLS_ID,
+                                                                    p_LBUC_NAT_ID, p_LBUC_CP_1_PREC, p_LBUC_CP_1, p_LBUC_AE_1_PREC, p_LBUC_AE_ANT, p_LBUC_IMP_ID,
+                                                                    p_LBUC_BUDC_CODE, p_LBUC_CHAP_CODE, p_LBUC_IMP_CODE, p_LBUC_VERS_CODE, p_LBUC_CADE_CODE, p_LBUC_AE_1,
+                                                                    p_LBUC_AE_1_TOT_CP, p_LBUC_FONCACT_ID, p_LBUC_EXPB_CODE, p_LBUC_COP_ID, p_LBUC_SFIN_CODE;
+                                                                  exit when c_LIGNE_BUDGET_COMP_prec%notfound and p_etat;
+                                                                  PK3_LIGNE_BUDGET_COMP.p_insertion(P_NEW_LBUC_CODE,
+                                                                                                    P_NEW__BUDC_CODE,
+                                                                                                    P_LBUC_CHAP_ID,
+                                                                                                    P_LBUC_NAT_ID,
+                                                                                                    p_LBUC_CADE_CODE,
+                                                                                                    P_LBUC_SFIN_CODE,
+                                                                  P_LBUC_CP_1_PREC, P_LBUC_CP_1, P_LBUC_AE_ANT, P_LBUC_AE_1_PREC,
+                                                                  P_LBUC_AE_1, P_LBUC_FONCACT_ID,
+                                                                  p_etat, p_erreur);
+
+
+                                                                   if(p_etat = true) then
+                                                                      open c_echeancier_cp_prec(v_LBUC_CODE);
+                                                                       loop
+                                                                          fetch c_echeancier_cp_prec into p_ECHE_MONT, p_ECHE_LBUC_CODE, p_ECHE_ANNEE,
+                                                                                p_ECHE_FONCACT_ID;
+                                                                          exit when c_echeancier_cp_prec%notfound and p_etat;
+                                                                            pk3_echeancier_cp.p_insertion(p_new_ECHE_CODE, p_ECHE_MONT, P_NEW_LBUC_CODE,
+                                                                            p_ECHE_ANNEE, p_ECHE_FONCACT_ID,
+                                                                            p_etat, p_erreur);
+                                                                            if(p_etat = false) then
+                                                                              p_erreur := 'Erreur lors de l''insertion des echeanciers_cp de la version precedente';
+                                                                              return;
+                                                                            end if;
+                                                                       end loop;
+                                                                       close c_echeancier_cp_prec;
+                                                                   else
+                                                                        p_erreur := 'Erreur lors de l''insertion du budget des composante de la version precedente';
+                                                                        p_papp_ref := '';
+                                                                        return;
+                                                                    end if;
+                                                                end loop;
+                                                                close c_LIGNE_BUDGET_COMP_prec;
+
+
+                                                        else
+                                                          P_ERREUR  := 'Erreur lors de l''insertion des budgets composants';
+                                                          p_papp_ref := '';
+                                                        end if;
+
+                                       end loop;
+                                     close c_budget_comp_prec;
+
+                                      ------------------------------------------------------------  budget_comp  precedents  -----------------------------------
+
+
+                              end if; -- p_papp_ref_prec is null
+                  else
+                      P_ETAT := false;
+                      P_ERREUR  := 'Impossible de recuperer la version ministerielle precedente';
+                      p_papp_ref := '';
+                  end if;  --if(v_vers_code_prec is not null)
+          else
+              P_ETAT := false;
+              P_ERREUR  := 'Impossible de recuperer la version globale precedente';
+              p_papp_ref := '';
+          end if;
+          else
+                -- fin insertion de l'objectif specifique du programme dans tb_resultat_attendus
+                p_etat := true;
+                                   open c_objectif_specif;
+                                        loop
+                                            fetch c_objectif_specif into p_obj_codeOBS;
+                                            exit when c_objectif_specif%notfound and p_etat;
+
+                                              pk3_result_attendus.p_insertion(v_new_resa_code, v_papp_ref,
+                                                          p_papp_dppd_ref,p_obj_codeOBS,p_papp_foncact_id,p_etat, p_erreur);
+
+
+                                              if(p_etat = true) then
+                                                      open c_indicateur_obj_specif(p_obj_codeOBS);
+                                                          loop
+                                                              fetch c_indicateur_obj_specif into p_ind_codeOBS;
+                                                              exit when c_indicateur_obj_specif%notfound and p_etat;
+                                                              PK3_PROJECTION_RESULTATS.p_insertion(p_pres_code, p_obj_codeOBS, p_ind_codeOBS,
+                                                                            '', '', '', null, v_new_resa_code, v_verg_expb_code,
+                                                                            '', p_papp_foncact_id, p_etat, p_erreur);
+                                                           end loop;
+                                                       close c_indicateur_obj_specif;
+                                              else
+                                                  P_ETAT := false;
+                                                  P_ERREUR  := 'Erreur lors de l''insertion des resultats attendus';
+                                                  p_papp_ref := '';
+                                              end if;
+
+                                        end loop;
+                                   close c_objectif_specif;
+
+                                  ------------------------- creation conteneur budget_comp  -------------------------------
+                                  open c_all_composante_programmable(p_papp_pro_id);
+                                                             loop
+                                                                fetch c_all_composante_programmable into p_COP_ID, p_COP_PPTIP_ID;
+                                                                 exit when c_all_composante_programmable%notfound and p_etat;
+                                                                -- exit when c_all_composante_programmable%notfound or p_etat=false;
+
+                                                                  pk3_budget_comp.p_insertion(P_NEW__BUDC_CODE, p_papp_vers_code, v_papp_ref, 'BUDC_1S', p_COP_ID, p_papp_foncact_id,
+                                                                     p_papp_expb_code,p_etat, p_erreur);
+                                                                 if(p_etat = true) then
+                                                                        NULL;
+                                                                      /* if p_COP_PPTIP_ID is null  then
+                                                                          p_LPCO_SFIN_CODE := 'TRE';
+                                                                          open c_categ_depense_prg;
+                                                                          loop
+                                                                             fetch c_categ_depense_prg into v_cade_code;
+                                                                             exit when c_categ_depense_prg%notfound or p_etat=false;
+
+                                                                             pk3_ligne_projection_comp.p_insertion(p_new_LPCO_CODE, v_cade_code, 0,
+                                                                              0, 0, P_NEW__BUDC_CODE, p_papp_foncact_id, p_LPCO_SFIN_CODE, p_COP_ID, p_etat, p_erreur);
+                                                                               if(p_etat != true) then
+                                                                                  --  p_erreur := 'Erreur lors de l''insertion des lignes de projections de la version initiale'||sqlerrm;
+                                                                                    p_papp_ref := '';
+                                                                                    return;
+                                                                                end if;
+
+                                                                            end loop;
+                                                                            close c_categ_depense_prg;
+                                                                    else
+                                                                              open c_all_source_fin;
+                                                                              loop
+                                                                                  fetch c_all_source_fin into p_LPCO_SFIN_CODE;
+                                                                                  exit when c_all_source_fin%notfound;
+                                                                                   open c_categ_depense_prg;
+                                                                                    loop
+                                                                                       fetch c_categ_depense_prg into v_cade_code;
+                                                                                       exit when c_categ_depense_prg%notfound or P_ETAT=false;
+
+                                                                                       pk3_ligne_projection_comp.p_insertion(p_new_LPCO_CODE, v_cade_code, 0,
+                                                                                        0, 0, P_NEW__BUDC_CODE, p_papp_foncact_id, p_LPCO_SFIN_CODE, p_COP_ID, p_etat, p_erreur);
+                                                                                         if(p_etat != true) then
+                                                                                              p_erreur := 'Erreur lors de l''insertion des lignes de projections de la version initiale';
+                                                                                              p_papp_ref := '';
+                                                                                              return;
+                                                                                          end if;
+
+                                                                                      end loop;
+                                                                                      close c_categ_depense_prg;
+                                                                              end loop;
+                                                                              close c_all_source_fin;
+
+                                                                     end if;
+
+                                                                            --------------------------- insertion dans tb_ligne_budget_comp
+
+                                                                            open c_ligne_chapitre(p_COP_ID);
+                                                                        loop
+                                                                           fetch c_ligne_chapitre into v_LCHAP_CHAP_ID, v_cc_cls_id, v_lchap_nat_id, v_chap_code, v_lchap_cade_code,
+                                                                           v_chap_sec_id, v_SEC_CODE, v_PRO_CODE, v_DIF_CODE, v_NAT_CODE;
+                                                                           exit when c_ligne_chapitre%notfound or P_ETAT=false;
+                                                                           P_IMP_ID := pk3_imput_budget.f_trouve_imputation(v_SEC_CODE||v_PRO_CODE||v_chap_code||
+                                                                           v_DIF_CODE||v_NAT_CODE);
+                                                                           if (P_IMP_ID is null) then
+                                                                                pk3_imput_budget.p_insertion(P_IMP_ID,
+                                                                                v_SEC_CODE||v_PRO_CODE||v_chap_code||
+                                                                                    v_DIF_CODE||v_NAT_CODE, v_chap_sec_id, p_papp_pro_id,
+                                                                                v_LCHAP_CHAP_ID, 'CLS04NBE12', null,
+                                                                                '2012006', v_lchap_nat_id, p_etat, p_erreur);
+                                                                                if(p_etat) then
+                                                                                    p_erreur := 'Erreur lors de l''insertion des imputations budgetaires de la version initiale';
+                                                                                    p_papp_ref := '';
+                                                                                    return;
+                                                                                end if;
+                                                                           end if;
+                                                                           PK3_LIGNE_BUDGET_COMP.p_insertion(P_LBUC_CODE, p_papp_pro_id, v_LCHAP_CHAP_ID,
+                                                                                                             v_cc_cls_id, v_lchap_nat_id, 0,
+                                                                                                             0, 0, 0,
+                                                                                                             P_IMP_ID, P_NEW__BUDC_CODE, v_chap_code,
+                                                                                                             v_SEC_CODE||v_PRO_CODE||v_chap_code||v_DIF_CODE||v_NAT_CODE, p_papp_vers_code,
+                                                                                                             v_lchap_cade_code, 0, 0,
+                                                                                                             p_papp_foncact_id,
+                                                                                                             p_etat, p_erreur);
+                                                                              if(p_etat != true) then
+                                                                                  p_erreur := 'Erreur lors de l''insertion des lignes de composante de la version initiale';
+                                                                                  p_papp_ref := '';
+                                                                                  return;
+                                                                              end if;
+
+                                                                            end loop;
+                                                                            close c_ligne_chapitre;*/
+
+
+
+
+                                                                    else
+                                                                         p_erreur := 'Erreur lors de l''insertion des conteneurs budget_comp de la version initiale';
+                                                                         p_papp_ref := '';
+                                                                         return;
+                                                                    end if;
+
+
+
+                                  end loop;
+                                  close c_all_composante_programmable;
+          end if; --    v_verg_num > 1
+
+      else
+          P_ETAT := false;
+          P_ERREUR  := 'Impossible de recuperer la version globale correspondante';
+          p_papp_ref := '';
+      end if;
+       EXCEPTION
+              when others then
+                    P_ETAT := false;
+                    P_ERREUR  := Sqlerrm;
+                    p_papp_ref := '';
+  END p_insertion;
+--------------------------------------------------------------------------------------------------
+PROCEDURE p_evol_credits_saisie(p_version_sec varchar2,
+                           p_prog varchar2,
+                           p_categ varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number) is
+ /*cette procedure recupere les projections enregistrees dans toutes les composantes du programme,
+  pour une categorie de depense et version donnees*/
+
+  cursor c_mont_annee is select sum(lbuc_cp_1) mont_1
+                   from tb_ligne_budget_comp, tb_budget_comp, tb_pap_programme
+                   where lbuc_budc_code=budc_code and lbuc_cade_code=p_categ
+                   and budc_papp_ref=papp_ref and papp_vers_code=p_version_sec
+                   and papp_pro_id=p_prog;
+
+  cursor c_mont is select sum(lpco_mont_2) mont_2,
+                          sum(lpco_mont_3) mont_3
+                   from tb_ligne_projection_comp, tb_budget_comp, tb_pap_programme
+                   where lpco_budc_code=budc_code and lpco_cade_code=p_categ
+                   and budc_papp_ref=papp_ref and papp_vers_code=p_version_sec
+                   and papp_pro_id=p_prog;
+ begin
+   open c_mont_annee;
+   fetch c_mont_annee into p_mont_n1;
+   close c_mont_annee;
+
+   open c_mont;
+   fetch c_mont into p_mont_n2, p_mont_n3;
+   close c_mont;
+ end p_evol_credits_saisie;
+--------------------------------------------------------------------------------------------------
+PROCEDURE p_credits_saisie(p_exe varchar2,
+                           p_sec_id varchar2,
+                           p_prog varchar2,
+                           p_categ varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number,
+                           p_mont_n1_ae out number,
+                           p_mont_n2_ae out number,
+                           p_mont_n3_ae out number) is
+ /*cette procedure recupere les projections enregistrees dans toutes les composantes du programme,
+  pour une categorie de depense et version donnees*/
+
+  cursor c_mont_annee is select sum(nvl(lbuc_ae_1,0)) mont_ae_1,sum(nvl(lbuc_cp_1,0)) mont_cp_1
+                   from tb_ligne_budget_comp, tb_budget_comp, tb_pap_programme
+                   where lbuc_budc_code=budc_code and lbuc_cade_code=p_categ
+                   and papp_dppd_ref like p_exe||'%'
+                   and budc_papp_ref=papp_ref and papp_sec_id=p_sec_id
+                   and papp_pro_id=p_prog;
+
+  cursor c_mont is select sum(lpco_mont_2) mont_2,
+                          sum(lpco_mont_3) mont_3
+                   from tb_ligne_projection_comp, tb_budget_comp, tb_pap_programme
+                   where lpco_budc_code=budc_code and lpco_cade_code=p_categ
+                   and budc_papp_ref=papp_ref and papp_sec_id=p_sec_id
+                   and papp_dppd_ref like p_exe||'%'
+                   and papp_pro_id=p_prog;
+ begin
+   open c_mont_annee;
+   fetch c_mont_annee into p_mont_n1_ae,p_mont_n1;
+   close c_mont_annee;
+
+   open c_mont;
+   fetch c_mont into p_mont_n2, p_mont_n3;
+   close c_mont;
+ end p_credits_saisie;
+--------------------------------------------------------------------------------------------------
+PROCEDURE p_credits_saisie(p_exe varchar2,
+                           p_sec_id varchar2,
+                           p_prog varchar2,
+                           p_categ varchar2,
+                           p_sfin_code varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number,
+                           p_mont_n1_ae out number,
+                           p_mont_n2_ae out number,
+                           p_mont_n3_ae out number) is
+ /*cette procedure recupere les projections enregistrees dans toutes les composantes du programme,
+  pour une categorie de depense et version donnees*/
+
+  cursor c_mont_annee is select sum(nvl(lbuc_ae_1,0)) mont_ae_1,sum(nvl(lbuc_cp_1,0)) mont_cp_1
+                   from tb_ligne_budget_comp, tb_budget_comp, tb_pap_programme
+                   where lbuc_budc_code=budc_code and lbuc_cade_code=p_categ
+                   and papp_dppd_ref like p_exe||'%'
+                   and budc_papp_ref=papp_ref and papp_sec_id=p_sec_id
+                   and papp_pro_id=p_prog
+                   and LBUC_SFIN_CODE=p_sfin_code;
+
+  cursor c_mont is select sum(lpco_mont_2) mont_2,
+                          sum(lpco_mont_3) mont_3
+                   from tb_ligne_projection_comp, tb_budget_comp, tb_pap_programme
+                   where lpco_budc_code=budc_code and lpco_cade_code=p_categ
+                   and budc_papp_ref=papp_ref and papp_sec_id=p_sec_id
+                   and papp_dppd_ref like p_exe||'%'
+                   and papp_pro_id=p_prog
+                   and LPCO_SFIN_CODE=p_sfin_code;
+ begin
+   open c_mont_annee;
+   fetch c_mont_annee into p_mont_n1_ae,p_mont_n1;
+   close c_mont_annee;
+
+   open c_mont;
+   fetch c_mont into p_mont_n2, p_mont_n3;
+   close c_mont;
+ end p_credits_saisie;
+--------------------------------------------------------------------------------------------------
+PROCEDURE p_evol_credits(p_version_sec varchar2,
+                           p_prog varchar2,
+                           p_categ varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number) is
+ /*cette procedure recupere les projections enregistrees et validees dans toutes les composantes du programme,
+  pour une categorie de depense et version donnees*/
+  cursor c_mont is select sum(lppg_mont_1) mont_1,
+                          sum(lppg_mont_2) mont_2,
+                          sum(lppg_mont_3) mont_3
+                   from tb_ligne_projection_prog, tb_pap_programme
+                   where lppg_cade_code=p_categ
+                   and lppg_papp_ref=papp_ref and papp_vers_code=p_version_sec
+                   and papp_pro_id=p_prog;
+ begin
+   open c_mont;
+   fetch c_mont into p_mont_n1, p_mont_n2, p_mont_n3;
+   close c_mont;
+ end p_evol_credits;
+
+---------------------------------------------------------------------------------------------------------------------------
+PROCEDURE p_prise_en_compte_activite(p_COP_ID IN tb_comp_prog.cop_id%TYPE,  p_COP_PPTIP_ID in tb_comp_prog.cop_pptip_id%TYPE, p_prog_id in tb_comp_prog.cop_pro_id%TYPE, p_etat out boolean, p_erreur out varchar2) is
+
+cursor c_verif_versionMin_enCours is
+       select tp.papp_ref, tp.papp_vers_code, tp.papp_sec_id, tp.papp_pro_id,
+              tp.papp_foncact_id,tp.papp_expb_code
+       from tb_pap_programme tp, TB_EXERCICE_PROJET_BUD expb
+       where expb.expb_code=tp.papp_expb_code
+         and trunc(expb.expb_debut)=(select max(trunc(expb1.expb_debut))
+                                     from TB_EXERCICE_PROJET_BUD expb1
+                                     where expb1.expb_fin is null)
+                                     and tp.papp_pro_id = p_prog_id
+                                     and tp.papp_stat_cod not in ('PAPP_2V', 'PAPP_3V');
+v_papp_ref tb_pap_programme.papp_ref%TYPE;
+v_papp_vers_code tb_pap_programme.papp_ref%TYPE;
+v_papp_sec_id tb_pap_programme.papp_ref%TYPE;
+v_papp_pro_id tb_pap_programme.papp_ref%TYPE;
+v_papp_foncact_id tb_pap_programme.papp_ref%TYPE;
+v_papp_expb_code tb_budget_comp.budc_expb_code%TYPE;
+P_NEW__BUDC_CODE tb_budget_comp.budc_code%TYPE;
+cursor c_all_source_fin is select sfin_code from tb_source_fin;
+/* cursor c_categ_depense_prg is select CADE_CODE from tb_categorie_depense where CADE_PROG = 'O'; */
+cursor c_categ_depense_prg is
+       select CADE_CODE from tb_categorie_depense
+       where CADE_COMP2 =1;
+v_cade_code varchar2(8);
+p_LPCO_SFIN_CODE varchar(10);
+p_new_LPCO_CODE tb_ligne_projection_comp.lpco_code%type;
+BEGIN
+  p_etat := true;
+  p_erreur := '';
+
+  open c_verif_versionMin_enCours;
+  fetch c_verif_versionMin_enCours into v_papp_ref, v_papp_vers_code, v_papp_sec_id, v_papp_pro_id, v_papp_foncact_id,v_papp_expb_code;
+  if (v_papp_ref is not null) then
+    pk3_budget_comp.p_insertion(P_NEW__BUDC_CODE,
+                                v_papp_vers_code,
+                                v_papp_ref,
+                                'BUDC_1S',
+                                p_COP_ID,
+                                v_papp_foncact_id,
+                                v_papp_expb_code,
+                                p_etat,
+                                p_erreur);
+    if(p_etat = true) then
+      if p_COP_PPTIP_ID is null then
+        p_LPCO_SFIN_CODE := 'TRE';
+        open c_categ_depense_prg;
+        loop
+          fetch c_categ_depense_prg into v_cade_code;
+          exit when c_categ_depense_prg%notfound or P_ETAT=false;
+          pk3_ligne_projection_comp.p_insertion(p_new_LPCO_CODE,
+                                                v_cade_code,
+                                                0, 0, 0,
+                                                P_NEW__BUDC_CODE,
+                                                v_papp_foncact_id,
+                                                p_LPCO_SFIN_CODE,
+                                                p_COP_ID,
+                                                p_etat,
+                                                p_erreur);
+          if (p_etat != true) then
+            p_erreur := 'Erreur lors de l''insertion des lignes de projections de la version initiale';
+            p_etat := false;
+            return;
+          end if;
+        end loop;
+        close c_categ_depense_prg;
+      else
+        open c_all_source_fin;
+        loop
+          fetch c_all_source_fin into p_LPCO_SFIN_CODE;
+          exit when c_all_source_fin%notfound;
+          open c_categ_depense_prg;
+          loop
+            fetch c_categ_depense_prg into v_cade_code;
+            exit when c_categ_depense_prg%notfound or P_ETAT=false;
+            pk3_ligne_projection_comp.p_insertion(p_new_LPCO_CODE,
+                                                  v_cade_code,
+                                                  0, 0, 0,
+                                                  P_NEW__BUDC_CODE,
+                                                  v_papp_foncact_id,
+                                                  p_LPCO_SFIN_CODE,
+                                                  p_COP_ID,
+                                                  p_etat,
+                                                  p_erreur);
+            if (p_etat != true) then
+              p_erreur := 'Erreur lors de l''insertion des lignes de projections de la version initiale';
+              p_etat := false;
+              return;
+            end if;
+          end loop;
+          close c_categ_depense_prg;
+        end loop;
+        close c_all_source_fin;
+      end if;
+      --------------------------- insertion dans tb_ligne_budget_comp
+    else
+      p_erreur := 'Erreur lors de l''insertion des conteneurs budget_comp de la version initiale';
+      p_etat := false;
+      return;
+    end if;
+  else
+    p_etat := true;
+    p_erreur := '';
+  end if;
+  close c_verif_versionMin_enCours;
+end p_prise_en_compte_activite;
+---------------------------------------------------------------------------------------------------------------------------
+END PK3_PAP_PROGRAMME;
+

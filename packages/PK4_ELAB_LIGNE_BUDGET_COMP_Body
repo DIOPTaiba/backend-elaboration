@@ -1,0 +1,208 @@
+create or replace PACKAGE BODY PK4_ELAB_LIGNE_BUDGET_COMP AS
+
+--------------------------------------------------------------------------------
+FUNCTION f_next_code RETURN varchar2 AS
+    cursor c_code is select max(to_number(substr(LBUC_CODE, 5))) from TB_LIGNE_BUDGET_COMP;
+    v_code varchar2(20);
+    v_max number;
+    begin
+      open c_code;
+      fetch c_code into v_max;
+      close c_code;
+      v_max:=nvl(v_max,0)+1;
+      v_code:='LBUC' || lpad(v_max,6,'0');
+      return v_code;
+    END f_next_code;
+--------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------
+PROCEDURE p_insertion(P_BUC_CODE out varchar2,
+                        P_LBUC_SEC_ID VARCHAR,
+                        P_LBUC_BUDC_CODE varchar2,
+                        P_LBUC_CHAP_ID varchar2,
+                        P_LBUC_NAT_ID number,
+                        P_LBUC_CADE_CODE varchar2,
+                        P_LBUC_SFIN_CODE varchar2,
+                        P_LBUC_SFIN_CODE_NEW varchar2,
+                        P_LBUC_BAILF_CODE number, /*code bailleur*/
+                        P_LBUC_CP_1_PREC number,  /*CP de la version precedente du projet de budget*/
+                        P_LBUC_CP_1 number,   /*CP de la version courante du projet de budget*/
+                        P_LBUC_AE_ANT number, /*AE gestions anterieures hors CP deja budgetises*/
+                        P_LBUC_AE_1_PREC number, /*AE de la version precedente du projet de budget*/
+                        P_LBUC_AE_1 number, /*AE de la version courante du projet de budget*/
+                        P_LBUC_FONCACT_ID varchar2,
+                        p_etat out number,
+                        p_erreur out varchar2) is
+
+ cursor c_bud_comp is select cop_pro_id pro_id, cop_id,cop_cop_id, BUDC_VERS_CODE vers_code, PAPP_EXPB_CODE EXPB_CODE
+                             from tb_budget_comp, tb_comp_prog, tb_pap_programme
+                              where budc_cop_id=cop_id and budc_code=P_LBUC_BUDC_CODE
+                              and budc_papp_ref=papp_ref;
+ cursor c_chap is select CHAP_CODE, CC_DIF_ID DIF_ID from tb_chapitre, tb_chap_classe
+                  where CHAP_ID=CC_CHAP_ID(+) and CHAP_ID=P_LBUC_CHAP_ID;
+
+
+ l_budc c_bud_comp%rowtype;
+ l_chap c_chap%rowtype;
+ V_BUC_CODE varchar2(10);
+ BEGIN
+     /* p_etat:=0;
+      p_erreur:='La mise à jour du projet de budget est verrouillée';
+      return;
+
+   if substr(P_LBUC_FONCACT_ID,1,5) not in ('SECTL', 'CGBUD') then
+      p_etat:=0;
+      p_erreur:='Privilèges insuffisants';
+      return;
+   end if;*/
+
+   open c_bud_comp;
+   fetch c_bud_comp into l_budc;
+   if c_bud_comp%notfound then
+      close c_bud_comp;
+      p_etat := 0;
+      p_erreur:='Le budget de la composante reference par '||P_LBUC_BUDC_CODE||' n''existe pas dans le systeme!';
+      return;
+   end if;
+   close c_bud_comp;
+
+   open c_chap;
+   fetch c_chap into l_chap;
+   if c_chap%notfound then
+      close c_chap;
+      p_etat := 0;
+      p_erreur:='Le chapitre reference par '||P_LBUC_CHAP_ID||' n''existe pas dans le systeme ou bien il n''est lie a aucune classe!';
+      return;
+   end if;
+   close c_chap;
+
+   V_BUC_CODE := f_next_code();
+   insert into TB_LIGNE_BUDGET_COMP(LBUC_CODE, LBUC_EXPB_CODE, LBUC_PRO_ID, LBUC_CHAP_ID, LBUC_CHAP_CODE, LBUC_DIF_ID, LBUC_SFIN_CODE, LBUC_BAILF_CODE,
+                                    LBUC_NAT_ID, LBUC_BUDC_CODE,  LBUC_VERS_CODE, LBUC_CADE_CODE, LBUC_DATE, LBUC_COP_ID,LBUC_ACTION_ID,
+                                    LBUC_CP_1_PREC, LBUC_CP_1, LBUC_AE_ANT, LBUC_AE_1_PREC, LBUC_AE_1, LBUC_FONCACT_ID,LBUC_SEC_ID,LBUC_SFIN_CODE_NEW)
+                             values(V_BUC_CODE, l_budc.expb_code, l_budc.pro_id, P_LBUC_CHAP_ID, l_chap.chap_code, nvl(l_chap.dif_id,0), P_LBUC_SFIN_CODE, P_LBUC_BAILF_CODE,
+                                    P_LBUC_NAT_ID, P_LBUC_BUDC_CODE, l_budc.vers_code, P_LBUC_CADE_CODE, sysdate, l_budc.cop_id,l_budc.cop_cop_id,
+                                    P_LBUC_CP_1_PREC, P_LBUC_CP_1, P_LBUC_AE_ANT, P_LBUC_AE_1_PREC, P_LBUC_AE_1, P_LBUC_FONCACT_ID,P_LBUC_SEC_ID,P_LBUC_SFIN_CODE_NEW);
+    p_etat := 1;
+    P_BUC_CODE:=V_BUC_CODE;
+    EXCEPTION
+           when others then
+                P_ETAT := 0;
+                P_ERREUR  := Sqlerrm;
+END p_insertion;
+------------------------------------------------------------------------------------
+
+-----------------------------------utilisée dans COMP_24---------------------------------------
+  PROCEDURE p_update(P_LBUC_CODE varchar2,
+                     P_LBUC_CP_1 number,   /*CP de la version courante du projet de budget*/
+                     P_LBUC_AE_1 number, /*AE de la version courante du projet de budget*/
+                     P_LBUC_CP_MN number,
+                     P_LBUC_AE_MN number,
+                     P_LBUC_FONCACT_ID varchar2,
+                     p_etat out number,
+                     p_erreur out varchar2) is
+
+ cursor c_budc_comp is select lbuc_budc_code, lbuc_cade_code, pro_typ_pro,lbuc_sec_id,lbuc_pro_id,lbuc_sfin_code,lbuc_expb_code,lbuc_ae_1,lbuc_cp_1,n.nat_code
+                              from tb_ligne_budget_comp, tb_programme,tb_nature_eco n
+                              where lbuc_pro_id=pro_id and lbuc_nat_id=n.nat_id  and lbuc_code=P_LBUC_CODE;
+
+ v_typ_pro varchar2(3);
+ v_cade_code varchar2(3);
+ v_pro_id varchar2(10);
+ v_budc_code varchar2(12);
+ V_LEVS_CODE varchar2(30);
+ v_sfin_code varchar2(4);
+ v_expb_code varchar2(10);
+ v_nat_code varchar2(10);
+ v_sec_id varchar2(10);
+ v_mont_cp number(15);
+ v_mont_ae number(15);
+ v_levp_mont_1 number(15);
+ v_levp_mont_ae1 number(15);
+ v_CUMUL_COMP_CP_1 number(15);
+ v_CUMUL_COMP_AE_1 number(15);
+ v_NEW_CUMUL_COMP_CP_1 number(15);
+ v_NEW_CUMUL_COMP_AE_1 number(15);
+ BEGIN
+
+     /* p_etat:=0;
+      p_erreur:='La mise à jour du projet de budget est verrouillée';
+      return;*/
+      /*
+   if substr(P_LBUC_FONCACT_ID,1,5) not in ('SECTL', 'CGBUD') then
+      p_etat:=0;
+      p_erreur:='Privilèges insuffisants';
+      return;
+   end if;*/
+
+   open c_budc_comp;
+   fetch c_budc_comp into v_budc_code, v_cade_code, v_typ_pro,v_sec_id,v_pro_id,v_sfin_code,v_expb_code,v_mont_ae,v_mont_cp,v_nat_code;
+   if c_budc_comp%notfound then
+      close c_budc_comp;
+      p_etat := 0;
+      p_erreur:='La ligne de budget de composante referencee par '||P_LBUC_CODE||' n''existe pas dans le systeme!';
+      return;
+   end if;
+   close c_budc_comp;
+
+
+
+
+  if v_typ_pro<>'3' and v_cade_code='2' and substr(v_nat_code,1,3)<>'668' then
+     p_etat:=0;
+     p_erreur:='Les crédits de dépense de personnel du budget général dont la nature économique est différente du paragraphe 668,
+     ne peuvent être mis à jour à partir de cette interface!';
+     return;
+  end if;
+
+     ------diallo
+
+         select levs_code into V_LEVS_CODE from tb_ligne_enveloppe_sec
+         where levs_cade_code=v_cade_code and levs_envs_code=(select envs_code from tb_enveloppe_sec
+         where envs_sec_id=v_sec_id and envs_verg_code=(select unique verg_code from tb_version_globale
+         where verg_expb_code=v_expb_code and verg_date_deb is not null and verg_date_fin is null))
+         and levs_typ_bud=decode(v_typ_pro,'3','CST','GEN')
+         and levs_sfin_code=v_sfin_code;
+
+         select  levp_mont_1,levp_mont_ae1,LEVP_CUMUL_COMP_CP_1,LEVP_CUMUL_COMP_AE_1
+         into    v_levp_mont_1,v_levp_mont_ae1,v_CUMUL_COMP_CP_1,v_CUMUL_COMP_AE_1
+         from tb_ligne_enveloppe_prog lep
+         where lep.LEVP_PRO_ID=v_pro_id
+         and lep.LEVP_CADE_CODE=v_cade_code
+         and lep.LEVP_LEVS_CODE=V_LEVS_CODE
+         and levp_sfin_code=v_sfin_code;
+
+         v_NEW_CUMUL_COMP_CP_1:=(nvl(v_CUMUL_COMP_CP_1,0)-nvl(v_mont_cp,0))+nvl(P_LBUC_CP_1,0);
+         v_NEW_CUMUL_COMP_AE_1:=(nvl(v_CUMUL_COMP_AE_1,0)-nvl(v_mont_ae,0))+nvl(P_LBUC_AE_1,0);
+
+         if v_NEW_CUMUL_COMP_AE_1 > v_levp_mont_ae1 then
+             p_etat:=0;
+             p_erreur:='L''enveloppe de programme en AE ne peut être dépassée! Corriger';
+             return;
+         end if;
+
+         if v_NEW_CUMUL_COMP_CP_1 > v_levp_mont_1 then
+             p_etat:=0;
+             p_erreur:='L''enveloppe de programme en CP ne peut être dépassée! Corriger';
+             return;
+         end if;
+
+         -------------------
+
+
+   update TB_LIGNE_BUDGET_COMP
+   set LBUC_CP_1=P_LBUC_CP_1, LBUC_AE_1=P_LBUC_AE_1, LBUC_FONCACT_ID=P_LBUC_FONCACT_ID,
+   LBUC_MN_AE=decode(nvl(P_LBUC_AE_MN,0),0,decode(substr(P_LBUC_FONCACT_ID,1,5),'CGBUD',nvl(P_LBUC_AE_MN,0),'SECTL',nvl(P_LBUC_AE_MN,0),LBUC_MN_AE),nvl(P_LBUC_AE_MN,0)),
+   LBUC_MN_CP=decode(nvl(P_LBUC_CP_MN,0),0,decode(substr(P_LBUC_FONCACT_ID,1,5),'CGBUD',nvl(P_LBUC_CP_MN,0),'SECTL',nvl(P_LBUC_CP_MN,0),LBUC_MN_CP),nvl(P_LBUC_CP_MN,0))
+   where LBUC_CODE=P_LBUC_CODE;
+
+   p_etat := 1;
+
+   EXCEPTION
+           when others then
+                P_ETAT := 0;
+                P_ERREUR  := Sqlerrm;
+END p_update;
+--------------------------------------------------------------------------------
+
+END PK4_ELAB_LIGNE_BUDGET_COMP;
