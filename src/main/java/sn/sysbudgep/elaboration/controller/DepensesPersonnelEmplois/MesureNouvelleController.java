@@ -3,9 +3,7 @@ package sn.sysbudgep.elaboration.controller.DepensesPersonnelEmplois;
 import org.springframework.web.bind.annotation.*;
 import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
 import sn.sysbudgep.elaboration.dto.classe.ResponseDto;
-import sn.sysbudgep.elaboration.dto.depensesPersonnelEmplois.ChapitreEffectifsDto;
 import sn.sysbudgep.elaboration.dto.depensesPersonnelEmplois.MesureNouvelleDto;
-import sn.sysbudgep.elaboration.service.depenesPersonnelEmplois.MajEmploisEffectifsService;
 import sn.sysbudgep.elaboration.service.depenesPersonnelEmplois.MesureNouvelleService;
 
 import java.sql.SQLException;

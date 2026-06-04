@@ -4,8 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import sn.sysbudgep.elaboration.dto.depensesPersonnelEmplois.ChapitreEffectifsDto;
-import sn.sysbudgep.elaboration.dto.global.LigneBudgetDto;
+import sn.sysbudgep.elaboration.dto.depensesPersonnelEmplois.MajEmploisEffectifsDto;
 import sn.sysbudgep.elaboration.entity.fonctionnementInvestissement.SaisieMajFctInves;
 
 import java.util.List;
@@ -37,7 +36,7 @@ public interface ChapitreEffectifsRepository extends JpaRepository<SaisieMajFctI
             "                ELSE 0\n" +
             "            END) nombreContractuel, 0 montant\n" +
             "    FROM vb3_affectation_agent a\n" +
-            "    WHERE a.AFFAG_EXPB_CODE=:exeCode1\n" +
+            "    WHERE a.AFFAG_EXPB_CODE=:exeCode\n" +
             "    AND a.AFFAG_PRO_ID =:proId\n" +
             "    AND (:idEmploi IS NULL OR a.AFFAG_EMPAG_ID = :idEmploi)\n" +
             "    GROUP BY \n" +
@@ -59,7 +58,7 @@ public interface ChapitreEffectifsRepository extends JpaRepository<SaisieMajFctI
             "        COUNT(*) effectif_prec, 0 nombreAgent,\n" +
             "        0 nombreContractuel, 0 montant\n" +
             "    FROM vb3_hist_affectation_agent a\n" +
-            "    WHERE a.AFFAG_EXPB_CODE=:exeCode\n" +
+            "    WHERE a.AFFAG_EXPB_CODE=:exeCode0\n" +
             "    AND a.AFFAG_PRO_ID =:proId\n" +
             "    AND (:idEmploi IS NULL OR a.AFFAG_EMPAG_ID = :idEmploi)\n" +
             "    GROUP BY \n" +
@@ -83,7 +82,7 @@ public interface ChapitreEffectifsRepository extends JpaRepository<SaisieMajFctI
             "    FROM vb3_affectation_agent a\n" +
             "    JOIN vb3_traitement_agent b\n" +
             "        ON a.AFFAG_AGT_MAT = b.TRTAG_AGT_MAT\n" +
-            "    WHERE a.AFFAG_EXPB_CODE=:exeCode1\n" +
+            "    WHERE a.AFFAG_EXPB_CODE=:exeCode\n" +
             "    AND a.AFFAG_PRO_ID =:proId\n" +
             "    AND (:idEmploi IS NULL OR a.AFFAG_EMPAG_ID = :idEmploi)\n" +
             "    GROUP BY \n" +
@@ -101,7 +100,7 @@ public interface ChapitreEffectifsRepository extends JpaRepository<SaisieMajFctI
             "    c.CHAP_LIB,  t.statut\n" +
             "ORDER BY \n" +
             "    c.CHAP_CODE, t.statut", nativeQuery = true)
-    List<ChapitreEffectifsDto> chapitreEffectifs(@Param("exeCode") String exeCode, @Param("exeCode1") String exeCode1,
-                                                 @Param("proId") String proId, @Param("idEmploi") Integer idEmploi);
+    List<MajEmploisEffectifsDto> chapitreEffectifs(@Param("exeCode0") String exeCode0, @Param("exeCode") String exeCode,
+                                                   @Param("proId") String proId, @Param("idEmploi") Integer idEmploi);
 
 }

@@ -1,13 +1,9 @@
 package sn.sysbudgep.elaboration.controller.DepensesPersonnelEmplois;
 
 import org.springframework.web.bind.annotation.*;
-import sn.sysbudgep.elaboration.dto.classe.MontantAECPDto;
 import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
-import sn.sysbudgep.elaboration.dto.classe.ResponseDto;
-import sn.sysbudgep.elaboration.dto.depensesPersonnelEmplois.ChapitreEffectifsDto;
-import sn.sysbudgep.elaboration.dto.global.LigneBudgetDto;
+import sn.sysbudgep.elaboration.dto.depensesPersonnelEmplois.MajEmploisEffectifsDto;
 import sn.sysbudgep.elaboration.service.depenesPersonnelEmplois.MajEmploisEffectifsService;
-import sn.sysbudgep.elaboration.service.fonctionnementInvestissement.SaisieMajFctInvesService;
 
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -25,9 +21,10 @@ public class MajEffectifsEmploisController {
         this.majEmploisEffectifsService = majEmploisEffectifsService;
     }
 
-    // Montants AE/CP d'une ligne d'enveloppe pour n1, n2 et n3
+    // liste de chapitre dans maj emplois et effecitfs
     @PostMapping(value = "chapitreEffectifs")
-    public List<ChapitreEffectifsDto> chapitreEffectifs(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
+    public List<MajEmploisEffectifsDto> chapitreEffectifs(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
         return majEmploisEffectifsService.chapitreEffectifs(pr);
     }
+
 }

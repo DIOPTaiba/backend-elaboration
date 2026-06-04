@@ -1,7 +1,9 @@
 package sn.sysbudgep.elaboration.service.impl.depenesPersonnelEmplois;
 
 import org.springframework.stereotype.Service;
+import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
 import sn.sysbudgep.elaboration.dto.depensesPersonnelEmplois.EmploiDto;
+import sn.sysbudgep.elaboration.dto.depensesPersonnelEmplois.MajEmploisEffectifsDto;
 import sn.sysbudgep.elaboration.repository.DepensesPersonnelEmplois.EmploiRepository;
 import sn.sysbudgep.elaboration.service.depenesPersonnelEmplois.EmploiService;
 
@@ -17,5 +19,10 @@ public class EmploiServiceimpl implements EmploiService {
     @Override
     public List<EmploiDto> getAllEmplois() {
             return emploiRepository.findAllEmplois();
+    }
+
+    @Override
+    public List<MajEmploisEffectifsDto> emploisEffectifs(ParametreRechercheDTO pr) {
+        return emploiRepository.emploisEffectifs(pr.getExeCode0(), pr.getExeCode(), pr.getProId(), pr.getIdEmploi());
     }
 }

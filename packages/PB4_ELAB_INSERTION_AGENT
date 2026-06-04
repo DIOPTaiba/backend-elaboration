@@ -1,0 +1,62 @@
+CREATE OR REPLACE PROCEDURE pb4_elab_insertion_agent (
+    p_expb_code   IN vb3_affectation_agent.affag_expb_code%TYPE,
+    p_matricule   IN vb3_affectation_agent.affag_agt_mat%TYPE,
+    p_nom         IN vb3_affectation_agent.affag_agt_nom%TYPE,
+    p_prenom      IN vb3_affectation_agent.affag_agt_prenoms%TYPE,
+    p_sec_id      IN vb3_affectation_agent.affag_sec_id%TYPE,
+    p_chap_id     IN vb3_affectation_agent.affag_chap_id%TYPE,
+    p_emp_id      IN vb3_affectation_agent.affag_empag_id%TYPE,
+    p_fonc_act_id IN vb3_affectation_agent.affag_foncact_id_sai%TYPE,
+    p_etat        OUT NUMBER,
+    p_erreur      OUT VARCHAR2
+) AS
+    CURSOR c IS
+    SELECT
+        act_mat
+    FROM
+        tb_acteur
+    WHERE
+        act_login = user;
+
+    v_matricule VARCHAR2(10);
+BEGIN
+    OPEN c;
+    FETCH c INTO v_matricule;
+    CLOSE c;
+    IF fb3_verrou_sectoriel(p_fonc_act_id, v_matricule) = 0 THEN
+        p_etat := 0;
+        p_erreur := 'Privilèges insuffisants';
+        RETURN;
+    ELSE
+        INSERT INTO tb_affectation_agent (
+            affag_id,
+            affag_agt_mat,
+            affag_sec_id,
+            affag_chap_id,
+            affag_sec_id_prec,
+            affag_chap_id_prec,
+            affag_expb_code,
+            affag_foncact_id_sai,
+            affag_date_sai,
+            affag_empag_id
+        ) VALUES (
+            pk3_affectation_agent.f_next_id,
+            p_matricule,
+            p_sec_id,
+            p_chap_id,
+            p_sec_id,
+            p_chap_id,
+            p_expb_code,
+            p_fonc_act_id,
+            sysdate,
+            p_emp_id
+        );
+
+        p_etat := 1;
+    END IF;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        p_etat := 0;
+        p_erreur := sqlerrm;
+END pb4_elab_insertion_agent;
