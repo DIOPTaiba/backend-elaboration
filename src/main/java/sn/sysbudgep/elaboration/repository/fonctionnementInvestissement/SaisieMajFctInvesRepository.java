@@ -24,7 +24,7 @@ public interface SaisieMajFctInvesRepository extends JpaRepository<SaisieMajFctI
             "and LBUC_COP_ID = activite.cop_id\n" +
             "and lbuc_nat_id = nat_id\n" +
             "and c.lbuc_chap_id=:chapId\n" +
-            "ORDER BY nat_code", nativeQuery = true)
+            "ORDER BY LBUC_DATE DESC", nativeQuery = true)
     List<LigneBudgetDto> ligneBudget(@Param("exeCode") String exeCode, @Param("chapId") String chapId);
 
     @Query(value = "SELECT DISTINCT\n" +
@@ -42,15 +42,15 @@ public interface SaisieMajFctInvesRepository extends JpaRepository<SaisieMajFctI
             "ORDER BY activite.cop_code", nativeQuery = true)
     List<ActiviteDto> listeActiviteSaisie(@Param("exeCode") String exeCode, @Param("chapId") String chapId);
 
-    @Query(value = "Select NAT_ID idLigne, NAT_CODE codeLigne, NAT_LIBELLE libLigne from vb3_nat_eco_budget where nat_cade_code=:cade_code\n" +
-            "and nat_id not in (select LBUC_NAT_ID from vb3_ligne_budget_comp\n" +
-            "                      where lbuc_budc_code=:budc_code\n" +
-            "                      and lbuc_chap_id = :chap_id\n" +
-            "                      and lbuc_cade_code = :cade_code\n" +
-            "                      and lbuc_sfin_code = :sfin_code\n" +
-            "and nat_code not like '211%'\n" +
-            "and nat_code not in ('2131','2151')\n" +
-            ")", nativeQuery = true)
+    @Query(value = "Select NAT_ID idLigne, NAT_CODE codeLigne, NAT_LIBELLE libLigne ,0 as aeLFI1, 0 as cpLFI1  from vb3_nature_eco_ligne where CADE_CODE=:cade_code\n" +
+            "                                     and nat_id not in (select LBUC_NAT_ID from vb3_ligne_budget_comp\n" +
+            "                                                        where lbuc_budc_code=:budc_code\n" +
+            "                                                          and lbuc_chap_id = :chap_id\n" +
+            "                                                          and lbuc_cade_code = :cade_code\n" +
+            "                                                          and lbuc_sfin_code = :sfin_code\n" +
+            "                                                          and nat_code not like '211%'\n" +
+            "                                                          and nat_code not in ('2131','2151')\n" +
+            "    )", nativeQuery = true)
     List<LigneBudgetDto> ligneSaisie(@Param("cade_code") String cadeCode,
                                      @Param("budc_code") String budcCode,
                                      @Param("chap_id") String chapId,
