@@ -1,11 +1,9 @@
 package sn.sysbudgep.elaboration.controller.global;
 
 import org.springframework.web.bind.annotation.*;
-import sn.sysbudgep.elaboration.dto.classe.MontantAECPDto;
 import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
 import sn.sysbudgep.elaboration.dto.classe.ResponseDto;
-import sn.sysbudgep.elaboration.dto.global.Agents;
-import sn.sysbudgep.elaboration.service.fonctionnementInvestissement.SaisieMajFctInvesService;
+import sn.sysbudgep.elaboration.dto.global.AgentsDto;
 import sn.sysbudgep.elaboration.service.global.AgentsService;
 
 import java.sql.SQLException;
@@ -26,7 +24,7 @@ public class AgentsController {
 
     // Tous les agents par chapitre ou un seul agent si matricule est renseigné
     @PostMapping(value = "")
-    public List<Agents> agents(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
+    public List<AgentsDto> agents(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
         return agentsService.agents(pr);
     }
 

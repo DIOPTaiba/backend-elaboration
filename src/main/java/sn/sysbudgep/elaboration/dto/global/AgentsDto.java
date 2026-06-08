@@ -2,10 +2,13 @@ package sn.sysbudgep.elaboration.dto.global;
 
 import java.math.BigDecimal;
 
-public interface Agents {
+public interface AgentsDto {
+    Integer getIdTraitement();
+    String getPrenom();
     String getNom();
     String getEmploi();
     String getMatricule();
+    BigDecimal getMontant();
     BigDecimal getMontantTraitementsSalaires();
     BigDecimal getMontantPrimes();
     BigDecimal getMontantIndemnites();

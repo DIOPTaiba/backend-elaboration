@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import sn.sysbudgep.elaboration.dto.global.Agents;
+import sn.sysbudgep.elaboration.dto.global.AgentsDto;
 import sn.sysbudgep.elaboration.entity.fonctionnementInvestissement.SaisieMajFctInves;
 
 import java.util.List;
@@ -88,7 +88,7 @@ public interface AgentsRepository extends JpaRepository<SaisieMajFctInves, Strin
             "    action.cop_code, action.cop_libelle, \n" +
             "    activite.cop_code, activite.cop_libelle\n" +
             "ORDER BY nom", nativeQuery = true)
-    List<Agents> agents(@Param("exeCode") String exeCode, @Param("chapId") String chapId,
-                        @Param("matricule") String matricule, @Param("codeEmploi") String codeEmploi);
+    List<AgentsDto> agents(@Param("exeCode") String exeCode, @Param("chapId") String chapId,
+                           @Param("matricule") String matricule, @Param("codeEmploi") String codeEmploi);
 
 }

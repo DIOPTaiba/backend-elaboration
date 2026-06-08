@@ -10,9 +10,8 @@ import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Service;
 import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
 import sn.sysbudgep.elaboration.dto.classe.ResponseDto;
-import sn.sysbudgep.elaboration.dto.global.Agents;
+import sn.sysbudgep.elaboration.dto.global.AgentsDto;
 import sn.sysbudgep.elaboration.repository.global.AgentsRepository;
-import sn.sysbudgep.elaboration.repository.global.CategorieDepenseRepository;
 import sn.sysbudgep.elaboration.service.global.AgentsService;
 import sn.sysbudgep.elaboration.service.impl.depenesPersonnelEmplois.MajEmploisEffectifsServiceImpl;
 
@@ -40,7 +39,7 @@ public class AgentsImpl implements AgentsService {
     }
 
     @Override
-    public List<Agents> agents(ParametreRechercheDTO pr) {
+    public List<AgentsDto> agents(ParametreRechercheDTO pr) {
         return agentsRepository.agents(pr.getExeCode(), pr.getChapId(), pr.getMatricule(), pr.getCodeEmploi());
     }
 

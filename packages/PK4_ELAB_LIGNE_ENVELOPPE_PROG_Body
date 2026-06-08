@@ -1,0 +1,94 @@
+CREATE OR REPLACE
+PACKAGE BODY PK4_ELAB_LIGNE_ENVELOPPE_PROG AS
+
+  function f_ptil_saisir (p_expb varchar2, p_foncact varchar2,
+                        p_prog varchar2, p_cade varchar2) return number AS
+  BEGIN
+    -- TODO: Implementation required for function PK4_ELAB_LIGNE_ENVELOPPE_PROG.f_ptil_saisir
+    RETURN NULL;
+  END f_ptil_saisir;
+
+  function f_get_levp_num(p_pro_id in tb_programme.pro_id%type,
+                        p_vers_code in tb_version_sec.vers_code%type,
+                        p_cade_code in tb_categorie_depense.cade_code%type) return tb_ligne_enveloppe_prog.levp_num%type AS
+  BEGIN
+    -- TODO: Implementation required for function PK4_ELAB_LIGNE_ENVELOPPE_PROG.f_get_levp_num
+    RETURN NULL;
+  END f_get_levp_num;
+
+  ------------------------------------------------------------------------------------------------------------
+  --------------------------------------------------------------------------------------------------
+PROCEDURE p_mont_env(p_levp varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number,
+                           p_mont_n1_ae out number,
+                           p_mont_n2_ae out number,
+                           p_mont_n3_ae out number) is
+ /*cette procedure recupere les montants d'une ligne d'enveloppe pour n1, n2 et n3*/
+ cursor c_mont is select levp_mont_1, levp_mont_2, levp_mont_3,levp_mont_ae1,levp_mont_ae2,levp_mont_ae3
+                   from tb_ligne_enveloppe_prog where levp_num=p_levp;
+begin
+  open c_mont;
+  fetch c_mont into p_mont_n1, p_mont_n2, p_mont_n3,p_mont_n1_ae,p_mont_n2_ae,p_mont_n3_ae;
+  close c_mont;
+
+ END p_mont_env;
+--------------------------------------------------------------------------------------------------
+ PROCEDURE p_mont_env(p_exe varchar2,
+                           p_sec_id varchar2,
+                           p_prog varchar2,
+                           p_categ varchar2,
+                           psfin_code varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number,
+                           p_mont_n1_ae out number,
+                           p_mont_n2_ae out number,
+                           p_mont_n3_ae out number) is
+ /*cette procedure recupere les montants d'une ligne d'enveloppe pour n1, n2 et n3*/
+ cursor c_select is select cade_env_prog from tb_categorie_depense
+        where cade_code=p_categ;
+
+ cursor c_levp_num is select levp_num
+                   from tb_ligne_enveloppe_prog, tb_enveloppe_prog
+                   where levp_envp_code=envp_code and envp_sec_id=p_sec_id
+                   and envp_dppd_ref like p_exe||'%'
+                   and envp_pro_id=p_prog and levp_cade_code=p_categ
+                   and nvl(LEVP_SFIN_CODE,'TRE')=psfin_code;
+
+ cursor c_levp_num_2 is select levp_num
+                   from tb_ligne_enveloppe_prog, tb_enveloppe_prog, tb_categorie_depense
+                   where levp_envp_code=envp_code and envp_sec_id=p_sec_id
+                   and envp_dppd_ref like p_exe||'%'
+                   and envp_pro_id=p_prog and levp_cade_code=cade_code
+                   and cade_code=p_categ
+                   and nvl(LEVP_SFIN_CODE,'TRE')=psfin_code;
+
+v_levp_num number;
+v_cade_env_prog number;
+begin
+  open c_select;
+  fetch c_select into v_cade_env_prog;
+  close c_select;
+
+  if v_cade_env_prog=1 then
+     open c_levp_num;
+     fetch c_levp_num into v_levp_num;
+     close c_levp_num;
+  elsif v_cade_env_prog=0 then
+     open c_levp_num_2;
+     fetch c_levp_num_2 into v_levp_num;
+     close c_levp_num_2;
+  end if;
+
+  if v_levp_num is null then
+     return;
+  end if;
+
+  p_mont_env(v_levp_num, p_mont_n1, p_mont_n2, p_mont_n3,p_mont_n1_ae,p_mont_n2_ae,p_mont_n3_ae);
+
+ END p_mont_env;
+------------------------------------------------------------------------------------------------------------
+
+END PK4_ELAB_LIGNE_ENVELOPPE_PROG;

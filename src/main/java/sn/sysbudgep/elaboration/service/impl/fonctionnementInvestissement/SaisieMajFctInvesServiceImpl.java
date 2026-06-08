@@ -46,7 +46,7 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
         try {
 
             SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate)
-                    .withCatalogName("PK3_LIGNE_ENVELOPPE_PROG")
+                    .withCatalogName("PK4_ELAB_LIGNE_ENVELOPPE_PROG")
                     .withProcedureName("p_mont_env")
                     // si plusieurs procédures avec même nom dans la BD oracle
                     .withoutProcedureColumnMetaDataAccess()
@@ -91,7 +91,7 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
             dto.setMontantN3AE(getBigDecimal(result, "p_mont_n3_ae"));
 
         } catch (DataAccessException e) {
-            logger.error("Erreur base de données procédure PK3_LIGNE_ENVELOPPE_PROG.p_mont_env()", e);
+            logger.error("Erreur base de données procédure PK4_ELAB_LIGNE_ENVELOPPE_PROG.p_mont_env()", e);
             throw new RuntimeException(
                     "Erreur récupération montants AE/CP", e
             );
@@ -106,7 +106,7 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
         try {
 
             SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate)
-                    .withCatalogName("PK3_PAP_PROGRAMME")
+                    .withCatalogName("PK4_ELAB_PAP_PROGRAMME")
                     .withProcedureName("p_credits_saisie")
                     // si plusieurs procédures avec même nom dans la BD oracle
                     .withoutProcedureColumnMetaDataAccess()
@@ -151,7 +151,7 @@ public class SaisieMajFctInvesServiceImpl implements SaisieMajFctInvesService {
             dto.setMontantN3AE(getBigDecimal(result, "p_mont_n3_ae"));
 
         } catch (DataAccessException e) {
-            logger.error("Erreur base de données procédure PK3_PAP_PROGRAMME.p_credits_saisie()", e);
+            logger.error("Erreur base de données procédure PK4_ELAB_PAP_PROGRAMME.p_credits_saisie()", e);
             throw new RuntimeException(
                     "Erreur récupération montants AE/CP", e
             );

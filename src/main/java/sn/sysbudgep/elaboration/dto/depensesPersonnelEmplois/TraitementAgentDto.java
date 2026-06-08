@@ -4,8 +4,13 @@ import java.math.BigDecimal;
 
 public interface TraitementAgentDto {
     String getParagraphe();
-    String getLigneDepense();
+    String getCodeLigne();
+    String getLibLigne();
     String getObservation();
     String getTexteReference();
     BigDecimal getMontant();
+    BigDecimal getCreditsInscrits();
+    BigDecimal getMesuresNouvelles();
+    BigDecimal getMontantLFIExeCode0();
+    BigDecimal getCreditsReevalues();
 }

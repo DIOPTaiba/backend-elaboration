@@ -1,0 +1,233 @@
+CREATE OR REPLACE
+PACKAGE BODY PK4_ELAB_PAP_PROGRAMME AS
+
+FUNCTION f_next_code RETURN varchar2 AS
+    --  a  partir de la version ministerielle retrouver EXPB_EXE dans la table tb_exercice_projet_bud
+    cursor c_code is select max(substr(papp_ref, 5)) from tb_pap_programme;
+    v_code varchar2(10);
+    v_max number;
+    begin
+      open c_code;
+      fetch c_code into v_max;
+      close c_code;
+      v_max:=nvl(v_max,0)+1;
+      v_code:='PAP-'||lpad(v_max,4,'0');
+      return v_code;
+  END f_next_code;
+-----------------------------------------------------------------------------------------------------------
+FUNCTION f_next_code (p_expb_code varchar2) RETURN varchar2 is
+    --  a  partir de la version ministerielle retrouver EXPB_EXE dans la table tb_exercice_projet_bud
+  CURSOR c_code is select max(to_number(substr(PAPP_REF, 7))) from tb_pap_programme
+              where substr(papp_ref,1,6)='PAPP'||substr(P_EXPB_CODE,3,2);
+--    cursor c_code is select max(substr(papp_ref, 5)) from tb_pap_programme;
+    v_code varchar2(10);
+    v_max number;
+    begin
+      open c_code;
+      fetch c_code into v_max;
+      close c_code;
+      v_max:=nvl(v_max,0)+1;
+      v_code:='PAPP'||substr(P_EXPB_CODE,3,2)||lpad(v_max,4,'0');
+      return v_code;
+  END f_next_code;
+  ----------------------------------------------------------------------------------------------------
+function F_NEXT_REV_PAPP(p_vers varchar2) return varchar2 is
+  cursor c_verif is select 'X' from tb_version_sec where vers_code=p_vers;
+  cursor c_rev_papp is select max(to_number(substr(rpapp_code,8))) from tb_revision_papp
+         where rpapp_vers_code=p_vers;
+  v_max number;
+  v_verif varchar2(1);
+  begin
+    if p_vers is null then
+       return null;
+    end if;
+
+    open c_verif;
+    fetch c_verif into v_verif;
+    if c_verif%notfound then
+       close c_verif;
+       return null;
+    else
+       close c_verif;
+       open c_rev_papp;
+       fetch c_rev_papp into v_max;
+       close c_rev_papp;
+       v_max:=nvl(v_max,0)+1;
+       return p_vers||lpad(v_max,3,'0');
+     end if;
+  end;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_saisir_resa(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number is
+  --renvoie 1 si pour un Programme donne, l'acteur peut saisir ou modifier les resultats attendus, renvoie 0 sinon
+begin
+  return 1; --a enlever
+  return PK3_PRIVILEGE_PPPB.f_get_priv_sur_prog(p_expb, p_foncact, p_prog, null, 'PPPB14');
+end f_ptil_saisir_resa;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_saisir_cmtaire(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number is
+  /*--renvoie 1 si pour un Programme donne, l'acteur peut saisir ou modifier les commentaires du PAP, renvoie 0 sinon
+    */
+begin
+  return 1; --a enlever
+  --return PK3_PRIVILEGE_PPPB.f_get_priv_sur_prog(p_expb, p_foncact, p_prog, null, 'PPPB14');
+end f_ptil_saisir_cmtaire;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_transmettre_resa(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number is
+  --renvoie 1 si pour un Programme donne, l'acteur peut saisir ou modifier les resultats attendus, renvoie 0 sinon
+begin
+  return PK3_PRIVILEGE_PPPB.f_get_priv_sur_prog(p_expb, p_foncact, p_prog, null, 'PPPB15');
+end f_ptil_transmettre_resa;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_transmettre_pap(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number is
+  /*--renvoie 1 si pour un Programme donne, l'acteur peut soumettre le PAP pour validation, renvoie 0 sinon*/
+begin
+ -- return 1; --a enlever
+  return PK3_PRIVILEGE_PPPB.f_get_priv_sur_prog(p_expb, p_foncact, p_prog, null, 'PPPB17');
+end f_ptil_transmettre_pap;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_creer_budcomp(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number is
+  /*--renvoie 1 si pour un Programme donne, l'acteur peut creer un budget de composante de programme
+   renvoie 0 sinon la valeur 1 indique egalement que l'acteur peut autoriser la revision d'un budget deja valide*/
+begin
+  return 1;
+  --return PK3_PRIVILEGE_PPPB.f_get_priv_sur_prog(p_expb, p_foncact, p_prog, null, 'PPPB16');
+end f_ptil_creer_budcomp;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_valider_resa(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number is
+  --renvoie 1 si pour un Programme donne, l'acteur peut valider les resultats attendus, renvoie 0 sinon
+begin
+  return PK3_PRIVILEGE_PPPB.f_get_priv_sur_prog(p_expb, p_foncact, p_prog, null, 'PPPB16');
+end f_ptil_valider_resa;
+--------------------------------------------------------------------------------------------------------------------
+Function f_is_papp_valide(p_papp varchar2) return number is
+/*cette fonction renvoie 1 si le PAPP est valide, 0 sinon*/
+  cursor c_recherche is select papp_stat_cod from tb_pap_programme where papp_ref=p_papp;
+  v_val varchar2(10);
+begin
+  open c_recherche;
+  fetch c_recherche into v_val;
+  close c_recherche;
+
+  if v_val in ('PAPP_1T', 'PAPP_2V') then
+     return 1;
+  else
+     return 0;
+  end if;
+
+end f_is_papp_valide;
+--------------------------------------------------------------------------------------------------------------------
+Function f_is_papp_a_valider(p_papp varchar2) return number is
+/*cette fonction renvoie 1 si le PAPP est a valider, 0 sinon*/
+  cursor c_recherche is select papp_stat_cod from tb_pap_programme where papp_ref=p_papp;
+  v_val varchar2(10);
+begin
+  open c_recherche;
+  fetch c_recherche into v_val;
+  close c_recherche;
+
+  if v_val='PAPP_1T' then
+     return 1;
+  else
+     return 0;
+  end if;
+
+end f_is_papp_a_valider;
+--------------------------------------------------------------------------------------------------------------------
+Function f_is_papp_a_transmettre(p_papp varchar2) return number is
+/*cette fonction renvoie 1 si le PAPP est a valider, 0 sinon*/
+  cursor c_recherche is select papp_stat_cod from tb_pap_programme where papp_ref=p_papp;
+  v_val varchar2(10);
+begin
+  open c_recherche;
+  fetch c_recherche into v_val;
+  close c_recherche;
+
+  if v_val in ('PAPP_0I', 'PAPP_2D') then
+     return 1;
+  else
+     return 0;
+  end if;
+
+end f_is_papp_a_transmettre;
+-----------------------------------------------------------------------------------------------------------------
+function get_papp_prec(p_papp varchar2) return varchar2 is
+/*Pour un pap de programme donnee, cette fonction renvoie le code du pap precedent*/
+
+  cursor c_pap_courant is select papp_dppd_ref, papp_pro_id
+         from tb_pap_programme where papp_ref=p_papp;
+
+  v_dppd_ref varchar2(10);
+  --v_vers_code varchar2(10);
+  v_pro_id varchar2(10);
+
+  --retrouver le PAP d'avant
+  cursor c_papp_prec(p_dppd_code_prec varchar2, p_pro_id varchar2) is
+          select papp_ref from tb_pap_programme
+          where papp_dppd_ref=p_dppd_code_prec and papp_pro_id=p_pro_id;
+
+  v_code_dppd_prec varchar2(10);
+  v_papp_prec varchar2(10);
+
+  begin
+    open c_pap_courant;
+    fetch c_pap_courant into v_dppd_ref, v_pro_id;
+    if c_pap_courant%notfound then
+       close c_pap_courant;
+       return null;
+    end if;
+    close c_pap_courant;
+
+    v_code_dppd_prec:=pk3_dppd.get_dppd_prec(v_dppd_ref);
+
+    if v_code_dppd_prec is null then --cas ou le DPPD precedent est null
+       return null;
+    else
+       open c_papp_prec(v_code_dppd_prec,v_pro_id);
+        fetch c_papp_prec into v_papp_prec;
+        close c_papp_prec;
+        return v_papp_prec;
+    end if;
+end get_papp_prec;
+------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------
+PROCEDURE p_credits_saisie(p_exe varchar2,
+                           p_sec_id varchar2,
+                           p_prog varchar2,
+                           p_categ varchar2,
+                           p_sfin_code varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number,
+                           p_mont_n1_ae out number,
+                           p_mont_n2_ae out number,
+                           p_mont_n3_ae out number) is
+ /*cette procedure recupere les projections enregistrees dans toutes les composantes du programme,
+  pour une categorie de depense et version donnees*/
+
+  cursor c_mont_annee is select sum(nvl(lbuc_ae_1,0)) mont_ae_1,sum(nvl(lbuc_cp_1,0)) mont_cp_1
+                   from tb_ligne_budget_comp, tb_budget_comp, tb_pap_programme
+                   where lbuc_budc_code=budc_code and lbuc_cade_code=p_categ
+                   and papp_dppd_ref like p_exe||'%'
+                   and budc_papp_ref=papp_ref and papp_sec_id=p_sec_id
+                   and papp_pro_id=p_prog
+                   and LBUC_SFIN_CODE=p_sfin_code;
+
+  cursor c_mont is select sum(lpco_mont_2) mont_2,
+                          sum(lpco_mont_3) mont_3
+                   from tb_ligne_projection_comp, tb_budget_comp, tb_pap_programme
+                   where lpco_budc_code=budc_code and lpco_cade_code=p_categ
+                   and budc_papp_ref=papp_ref and papp_sec_id=p_sec_id
+                   and papp_dppd_ref like p_exe||'%'
+                   and papp_pro_id=p_prog
+                   and LPCO_SFIN_CODE=p_sfin_code;
+ begin
+   open c_mont_annee;
+   fetch c_mont_annee into p_mont_n1_ae,p_mont_n1;
+   close c_mont_annee;
+
+   open c_mont;
+   fetch c_mont into p_mont_n2, p_mont_n3;
+   close c_mont;
+ end p_credits_saisie;
+--------------------------------------------------------------------------------------------------
+END PK4_ELAB_PAP_PROGRAMME;

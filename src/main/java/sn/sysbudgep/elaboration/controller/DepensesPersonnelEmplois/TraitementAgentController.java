@@ -2,14 +2,10 @@ package sn.sysbudgep.elaboration.controller.DepensesPersonnelEmplois;
 
 import org.springframework.web.bind.annotation.*;
 import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
-import sn.sysbudgep.elaboration.dto.classe.ResponseDto;
-import sn.sysbudgep.elaboration.dto.depensesPersonnelEmplois.MesureNouvelleDto;
 import sn.sysbudgep.elaboration.dto.depensesPersonnelEmplois.TraitementAgentDto;
-import sn.sysbudgep.elaboration.service.depenesPersonnelEmplois.MesureNouvelleService;
+import sn.sysbudgep.elaboration.dto.global.AgentsDto;
 import sn.sysbudgep.elaboration.service.depenesPersonnelEmplois.TraitementAgentService;
 
-import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.List;
 
 @RestController
@@ -26,7 +22,19 @@ public class TraitementAgentController {
 
     // Traitement agent individuel
     @PostMapping(value = "/individuel")
-    public List<TraitementAgentDto> traitementAgent(@RequestBody ParametreRechercheDTO pr){
-        return traitementAgentService.traitementAgent(pr);
+    public List<TraitementAgentDto> traitementIndividuel(@RequestBody ParametreRechercheDTO pr){
+        return traitementAgentService.traitementIndividuel(pr);
+    }
+
+    // Traitement agent individuel
+    @PostMapping(value = "/collectif")
+    public List<TraitementAgentDto> traitementCollectif(@RequestBody ParametreRechercheDTO pr){
+        return traitementAgentService.traitementCollectif(pr);
+    }
+
+    // Liste agents par chapId, natId
+    @PostMapping(value = "/agentsChapNatId")
+    public List<AgentsDto> agentsChapNatId(@RequestBody ParametreRechercheDTO pr){
+        return traitementAgentService.agentsChapNatId(pr);
     }
 }

@@ -1,0 +1,33 @@
+CREATE OR REPLACE 
+PACKAGE PK4_ELAB_PAP_PROGRAMME AS 
+
+FUNCTION f_next_code RETURN varchar2;
+------------------------------------------------------------------------------------------------------------------
+function f_ptil_saisir_resa(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_saisir_cmtaire(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number;
+function f_ptil_transmettre_resa(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_transmettre_pap(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number;
+-----------------------------------------------------------------------------------------------------------------
+function f_ptil_creer_budcomp(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number;
+function f_ptil_valider_resa(p_expb varchar2, p_prog varchar2, p_foncact varchar2) return number;
+--------------------------------------------------------------------------------------------------------------------
+Function f_is_papp_valide(p_papp varchar2) return number;
+function get_papp_prec(p_papp varchar2) return varchar2;
+
+--------------------------------------------------------------------------------------------------
+PROCEDURE p_credits_saisie(p_exe varchar2,
+                           p_sec_id varchar2,
+                           p_prog varchar2,
+                           p_categ varchar2,
+                           p_sfin_code varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number,
+                           p_mont_n1_ae out number,
+                           p_mont_n2_ae out number,
+                           p_mont_n3_ae out number);
+--------------------------------------------------------------------------------------------------
+
+END PK4_ELAB_PAP_PROGRAMME;

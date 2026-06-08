@@ -1,0 +1,33 @@
+CREATE OR REPLACE 
+PACKAGE PK4_ELAB_LIGNE_ENVELOPPE_PROG AS
+
+function f_ptil_saisir (p_expb varchar2, p_foncact varchar2,
+                        p_prog varchar2, p_cade varchar2) return number;
+------------------------------------------------------------------------------------------------------------------------------
+function f_get_levp_num(p_pro_id in tb_programme.pro_id%type,
+                        p_vers_code in tb_version_sec.vers_code%type,
+                        p_cade_code in tb_categorie_depense.cade_code%type) return tb_ligne_enveloppe_prog.levp_num%type;
+------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------
+PROCEDURE p_mont_env(p_levp varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number,
+                           p_mont_n1_ae out number,
+                           p_mont_n2_ae out number,
+                           p_mont_n3_ae out number);
+------------------------------------------------------------------------------------------------------------------------------
+ PROCEDURE p_mont_env(p_exe varchar2,
+                           p_sec_id varchar2,
+                           p_prog varchar2,
+                           p_categ varchar2,
+                           psfin_code varchar2,
+                           p_mont_n1 out number,
+                           p_mont_n2 out number,
+                           p_mont_n3 out number,
+                           p_mont_n1_ae out number,
+                           p_mont_n2_ae out number,
+                           p_mont_n3_ae out number);
+------------------------------------------------------------------------------------------------------------------------------
+
+END PK4_ELAB_LIGNE_ENVELOPPE_PROG;
