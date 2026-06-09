@@ -60,17 +60,24 @@ public interface TraitementAgentRepository extends JpaRepository<SaisieMajFctInv
     List<AgentsDto> agentsChapNatId(@Param("exeCode") String exeCode, @Param("chapId") String chapId, @Param("natId") String natId);
 
     // Liste agents par chapId, natId
-    @Query(value = "select t.TRTAG_ID idTraitement, t.TRTAG_AGT_MAT matricule, a.AFFAG_AGT_PRENOMS prenom, a.AFFAG_AGT_NOM nom,\n" +
-            "e.EMPAG_LIB emploi, t.TRTAG_MONT montant\n" +
-            "from VB3_TRAITEMENT_AGENT t, vb3_affectation_agent a, vb3_emploi_agent e\n" +
-            "where a.AFFAG_AGT_MAT = t.TRTAG_AGT_MAT\n" +
-            "and a.AFFAG_EMPAG_ID = e.EMPAG_ID\n" +
-            "and trtag_expb_code=:exeCode \n" +
-            "and trtag_nat_id=:natId\n" +
-            "and trtag_agt_mat in (select AFFAG_AGT_MAT from vb3_AFFECTATION_AGENT \n" +
-            "        where AFFAG_CHAP_ID=:chapId \n" +
-            "        and AFFAG_EXPB_CODE=:exeCode \n" +
-            "        and affag_date_cess is null)\n" +
+    @Query(value = "SELECT\n" +
+            "    a.AFFAG_AGT_MAT matricule,\n" +
+            "    a.AFFAG_AGT_PRENOMS prenom,\n" +
+            "    a.AFFAG_AGT_NOM nom,\n" +
+            "    e.EMPAG_LIB emploi\n" +
+            "FROM vb3_affectation_agent a\n" +
+            "JOIN vb3_emploi_agent e\n" +
+            "    ON a.AFFAG_EMPAG_ID = e.EMPAG_ID\n" +
+            "WHERE a.AFFAG_CHAP_ID = :chapId\n" +
+            "AND a.AFFAG_EXPB_CODE = :exeCode\n" +
+            "AND a.AFFAG_DATE_CESS IS NULL\n" +
+            "AND NOT EXISTS (\n" +
+            "    SELECT 1\n" +
+            "    FROM VB3_TRAITEMENT_AGENT t\n" +
+            "    WHERE t.TRTAG_AGT_MAT = a.AFFAG_AGT_MAT\n" +
+            "      AND t.TRTAG_EXPB_CODE = :exeCode\n" +
+            "      AND t.TRTAG_NAT_ID = :natId\n" +
+            ")\n" +
             "ORDER BY a.AFFAG_AGT_PRENOMS", nativeQuery = true)
     List<AgentsDto> agentsAAjouter(@Param("exeCode") String exeCode, @Param("chapId") String chapId, @Param("natId") String natId);
 

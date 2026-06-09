@@ -25,7 +25,7 @@ public class NatureEconomiqueController {
     }
 
     // Lignes budget (Natures économiques) dont aucun agent du chapitre ne bénéficie
-    @PostMapping(value = "byExeChapId")
+    @PostMapping(value = "byExeCodeChapId")
     public List<LigneBudgetDto> naturesEconomiques(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
         return natureEconomiqueService.naturesEconomiques(pr);
     }
