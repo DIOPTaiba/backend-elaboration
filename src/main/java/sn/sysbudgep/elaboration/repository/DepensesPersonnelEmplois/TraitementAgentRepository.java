@@ -44,7 +44,7 @@ public interface TraitementAgentRepository extends JpaRepository<SaisieMajFctInv
             "ORDER BY n.NAT_LIBELLE", nativeQuery = true)
     List<TraitementAgentDto> traitementCollectif(@Param("exeCode") String exeCode, @Param("sectionId") String sectionId, @Param("chapId") String chapId);
 
-    // Liste agents par chapId, natId
+    // Liste agents par chapId, natId à modifier
     @Query(value = "select t.TRTAG_ID idTraitement, t.TRTAG_AGT_MAT matricule, a.AFFAG_AGT_PRENOMS prenom, a.AFFAG_AGT_NOM nom,\n" +
             "e.EMPAG_LIB emploi, t.TRTAG_MONT montant\n" +
             "from VB3_TRAITEMENT_AGENT t, vb3_affectation_agent a, vb3_emploi_agent e\n" +
@@ -58,5 +58,20 @@ public interface TraitementAgentRepository extends JpaRepository<SaisieMajFctInv
             "        and affag_date_cess is null)\n" +
             "ORDER BY a.AFFAG_AGT_PRENOMS", nativeQuery = true)
     List<AgentsDto> agentsChapNatId(@Param("exeCode") String exeCode, @Param("chapId") String chapId, @Param("natId") String natId);
+
+    // Liste agents par chapId, natId
+    @Query(value = "select t.TRTAG_ID idTraitement, t.TRTAG_AGT_MAT matricule, a.AFFAG_AGT_PRENOMS prenom, a.AFFAG_AGT_NOM nom,\n" +
+            "e.EMPAG_LIB emploi, t.TRTAG_MONT montant\n" +
+            "from VB3_TRAITEMENT_AGENT t, vb3_affectation_agent a, vb3_emploi_agent e\n" +
+            "where a.AFFAG_AGT_MAT = t.TRTAG_AGT_MAT\n" +
+            "and a.AFFAG_EMPAG_ID = e.EMPAG_ID\n" +
+            "and trtag_expb_code=:exeCode \n" +
+            "and trtag_nat_id=:natId\n" +
+            "and trtag_agt_mat in (select AFFAG_AGT_MAT from vb3_AFFECTATION_AGENT \n" +
+            "        where AFFAG_CHAP_ID=:chapId \n" +
+            "        and AFFAG_EXPB_CODE=:exeCode \n" +
+            "        and affag_date_cess is null)\n" +
+            "ORDER BY a.AFFAG_AGT_PRENOMS", nativeQuery = true)
+    List<AgentsDto> agentsAAjouter(@Param("exeCode") String exeCode, @Param("chapId") String chapId, @Param("natId") String natId);
 
 }

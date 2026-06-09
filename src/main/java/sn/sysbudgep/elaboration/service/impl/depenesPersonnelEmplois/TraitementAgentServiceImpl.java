@@ -53,7 +53,7 @@ public class TraitementAgentServiceImpl implements TraitementAgentService {
         return traitementAgentRepository.traitementCollectif(pr.getExeCode(), pr.getSectionId(), pr.getChapId());
     }
 
-    // Liste agents par chapId, natId
+    // Liste agents par chapId, natId à modifier
     @Override
     public List<AgentsDto> agentsChapNatId(ParametreRechercheDTO pr) {
         return traitementAgentRepository.agentsChapNatId(pr.getExeCode(), pr.getChapId(), pr.getNatId());
@@ -61,7 +61,7 @@ public class TraitementAgentServiceImpl implements TraitementAgentService {
 
     // Modification traitement collectif
     @Override
-    public ResponseDto majTraitementAgent(List<TraitementsAgentDto> traitementAgentDto) throws SQLException, ParseException {
+    public ResponseDto majTraitementAgent(List<TraitementsAgentDto> traitementsAgentDtos) throws SQLException, ParseException {
         ResponseDto responseDto = new ResponseDto();
         SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PK4_ELAB_TRAITEMENT_AGENT")
@@ -77,7 +77,7 @@ public class TraitementAgentServiceImpl implements TraitementAgentService {
                         new SqlOutParameter("P_ERREUR", Types.VARCHAR)
                 );
 
-        for (TraitementsAgentDto tr : traitementAgentDto) {
+        for (TraitementsAgentDto tr : traitementsAgentDtos) {
 
             Map<String, Object> params = new HashMap<>();
             params.put("p_trait", tr.getTraitementId());
@@ -98,4 +98,54 @@ public class TraitementAgentServiceImpl implements TraitementAgentService {
         responseDto.setEtat(1);
         return responseDto;
     }
+
+    @Override
+    public List<AgentsDto> agentsAAjouter(ParametreRechercheDTO pr) {
+        return traitementAgentRepository.agentsAAjouter(pr.getExeCode(), pr.getChapId(), pr.getNatId());
     }
+
+    // Insertion traitement collectif
+    @Override
+    public ResponseDto insertTraitementAgent(List<TraitementsAgentDto> traitementsAgentDtos) throws SQLException, ParseException {
+        ResponseDto responseDto = new ResponseDto();
+        SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate)
+                .withCatalogName("PK4_ELAB_TRAITEMENT_AGENT")
+                .withProcedureName("p_insert_trait_agent")
+                .withoutProcedureColumnMetaDataAccess()
+                .declareParameters(
+                        new SqlOutParameter("p_trait", Types.NUMERIC),
+                        new SqlParameter("p_expb", Types.VARCHAR),
+                        new SqlParameter("p_mat", Types.VARCHAR),
+                        new SqlParameter("p_nat", Types.NUMERIC),
+                        new SqlParameter("p_mont", Types.NUMERIC),
+                        new SqlParameter("P_TEXTE_REF", Types.VARCHAR),
+                        new SqlParameter("P_OBS", Types.VARCHAR),
+                        new SqlParameter("p_acteur", Types.VARCHAR),
+                        new SqlOutParameter("P_ETAT", Types.NUMERIC),
+                        new SqlOutParameter("P_ERREUR", Types.VARCHAR)
+                );
+
+        for (TraitementsAgentDto tr : traitementsAgentDtos) {
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("p_expb", tr.getExeCode());
+            params.put("p_mat", tr.getMatricule());
+            params.put("p_nat", tr.getNatId());
+            params.put("p_mont", tr.getMontant());
+            params.put("P_TEXTE_REF", tr.getTextReference());
+            params.put("P_OBS", tr.getObservations());
+            params.put("p_acteur", tr.getFoncatId());
+
+            Map<String, Object> result = call.execute(params);
+
+            if (getInteger(result, "P_ETAT") == 0) {
+                responseDto.setEtat(0);
+                responseDto.setMessageErreur(
+                        getString(result, "P_ERREUR"));
+                return responseDto;
+            }
+        }
+        responseDto.setEtat(1);
+        return responseDto;
+    }
+}

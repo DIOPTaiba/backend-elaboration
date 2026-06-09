@@ -179,25 +179,25 @@ begin
 
   if p_expb is null then
      p_etat:=0;
-     p_erreur:='L''exercice budgetaire doit etre renseigne.';
+     p_erreur:='L''exercice budgetaire doit être renseigné.';
      return;
   end if;
 
   if p_mat is null then
      p_etat:=0;
-     p_erreur:='Le matricule de l''agent doit etre renseigne.';
+     p_erreur:='Le matricule de l''agent doit être renseigné.';
      return;
   end if;
 
   if p_mont is null then
      p_etat:=0;
-     p_erreur:='Le montant alloue pour la nature de depense doit etre renseigne.';
+     p_erreur:='Le montant alloue pour la nature de dépense doit être renseigné.';
      return;
   end if;
 
   if p_nat is null then
      p_etat:=0;
-     p_erreur:='La reference de la nature economique de la depense doit etre renseignee.';
+     p_erreur:='La référence de la nature économique de la dépense doit être renseignée.';
      return;
   end if;
 
@@ -206,7 +206,7 @@ begin
   if c_verif%found then
      close c_verif;
      p_etat:=0;
-     p_erreur:='Un traitement existe deja sur l''agent et la nature de depense. L''identifiant est le numero '||v_verif||'. Vous ne pouvez pas faire une nouvelle insertion.';
+     p_erreur:='Un traitement existe dèjà sur l''agent et la nature de dépense. L''identifiant est le numero '||v_verif||'. Vous ne pouvez pas faire une nouvelle insertion.';
      return;
   end if;
   close c_verif;
@@ -216,20 +216,20 @@ begin
   if c_rech%notfound then
      close c_rech;
      p_etat:=0;
-     p_erreur:='L''agent '||p_mat||' n''est affecte a aucune section pour sur l''exercice '||substr(p_expb,1,4)||'.';
+     p_erreur:='L''agent '||p_mat||' n''est affecté a aucune section sur l''exercice '||substr(p_expb,1,4)||'.';
      return;
   end if;
   close c_rech;
 
   if f_ptil_modifier(p_expb,p_mat,p_acteur)<>1 then
      p_etat:=0;
-     p_erreur:='Vos privileges ne suffisent pas pour la mise a jour du traitement de l''agent de matricule '||p_mat||'.';
+     p_erreur:='Vos privileges ne suffisent pas pour la mise à jour du traitement de l''agent de matricule '||p_mat||'.';
      return;
   end if;
 
   if f_is_modifiable(p_expb,v_sec_id)<>1 then
      p_etat:=0;
-     p_erreur:='Le statut actuel du projet de budget ne permet pas la mise a jour des traitements des agents.';
+     p_erreur:='Le statut actuel du projet de budget ne permet pas la mise à jour des traitements des agents.';
      return;
   end if;
 
@@ -273,7 +273,7 @@ begin
 
   if p_mont is null then
      p_etat:=0;
-     p_erreur:='Le montant alloue pour la nature de depense doit etre renseigne.';
+     p_erreur:='Le montant alloué pour la nature de depense doit etre renseigné.';
      return;
   end if;
 
@@ -282,14 +282,14 @@ begin
   if c_verif%notfound then
      close c_verif;
      p_etat:=0;
-     p_erreur:='Le traitement reference par '||p_trait||' est, inconnu du systeme.';
+     p_erreur:='Le traitement referencé par '||p_trait||' est, inconnu du système.';
      return;
   end if;
   close c_verif;
 
   if F_PTIL_MODIFIER(v_expb,v_sec_id,p_acteur)<>1 then
      p_etat:=0;
-     p_erreur:='Vos privileges ne suffisent pas pour la mise a jour du traitement de l''agent '||v_mat||'.';
+     p_erreur:='Vos privilèges ne suffisent pas pour la mise a jour du traitement de l''agent '||v_mat||'.';
      return;
   end if;
 

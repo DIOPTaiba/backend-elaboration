@@ -10,11 +10,13 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TraitementsAgentDto {
+    private String exeCode="";
+    private String matricule="";
+    private String natId="";
     private Integer traitementId;
     private BigDecimal montant;
     private String foncatId="";
     private String foncatIdModif="";
     private String textReference="";
     private String observations="";
-
 }

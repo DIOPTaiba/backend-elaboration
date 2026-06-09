@@ -47,4 +47,16 @@ public class TraitementAgentController {
     public ResponseDto majTraitementAgent(@RequestBody List<TraitementsAgentDto> tr) throws SQLException, ParseException {
         return traitementAgentService.majTraitementAgent(tr);
     }
+
+    // Liste à insérer
+    @PostMapping(value = "/agentsAAjouter")
+    public List<AgentsDto> agentsAAjouter(@RequestBody ParametreRechercheDTO pr){
+        return traitementAgentService.agentsAAjouter(pr);
+    }
+
+    // Insertion traitement collectif
+    @PostMapping(value = "/insertTraitementAgent")
+    public ResponseDto insertTraitementAgent(@RequestBody List<TraitementsAgentDto> tr) throws SQLException, ParseException {
+        return traitementAgentService.insertTraitementAgent(tr);
+    }
 }
