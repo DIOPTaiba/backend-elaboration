@@ -23,13 +23,26 @@ public interface TraitementAgentRepository extends JpaRepository<SaisieMajFctInv
     List<TraitementAgentDto> traitementIndividuel(@Param("exeCode") String exeCode, @Param("matricule") String matricule);
 
     // Données traitement collectif
-    @Query(value = "select n.NAT_ID natId, n.NAT_CODE codeLigne, n.NAT_LIBELLE libLigne, BPCL_SVR creditsInscrits, BPCL_MN mesuresNouvelles\n" +
-            "from vb3_budget_pers_chap_ligne l, vb3_nature_eco n\n" +
-            "where l.BPCL_NAT_ID = n.NAT_ID\n" +
-            "and BPCL_EXPB_CODE=:exeCode\n" +
-            "AND BPCL_CHAP_ID=:chapId\n" +
+    @Query(value = "SELECT\n" +
+            "    n.NAT_ID idLigne, n.NAT_CODE codeLigne,\n" +
+            "    n.NAT_LIBELLE libLigne, NVL(bc.BUDCL_LFI,0) montantLFIExeCode0,\n" +
+            "    NVL(l.BPCL_SVR,0) creditsReevalues, NVL(l.BPCL_MN,0) mesuresNouvelles,\n" +
+            "    NVL(l.BPCL_SVR,0) + NVL(l.BPCL_MN,0) creditsInscrits\n" +
+            "FROM vb3_budget_pers_chap_ligne l\n" +
+            "INNER JOIN vb3_nature_eco n\n" +
+            "    ON l.BPCL_NAT_ID = n.NAT_ID\n" +
+            "LEFT JOIN vb3_budget_chap_ligne bc\n" +
+            "    ON bc.BUDCL_NAT_ID   = l.BPCL_NAT_ID\n" +
+            "   AND bc.BUDCL_CHAP_ID  = l.BPCL_CHAP_ID\n" +
+            "   AND bc.BUDCL_EXPB_CODE = :exeCode\n" +
+            "   AND bc.BUDCL_VERS_CODE =\n" +
+            "       fb3_version_sec_courante(:exeCode, :sectionId)\n" +
+            "   AND bc.BUDCL_SFIN_CODE = 'TRE'\n" +
+            "   AND bc.BUDCL_BAILF_CODE = 1\n" +
+            "WHERE l.BPCL_EXPB_CODE = :exeCode\n" +
+            "AND l.BPCL_CHAP_ID = :chapId\n" +
             "ORDER BY n.NAT_LIBELLE", nativeQuery = true)
-    List<TraitementAgentDto> traitementCollectif(@Param("exeCode") String exeCode, @Param("chapId") String chapId);
+    List<TraitementAgentDto> traitementCollectif(@Param("exeCode") String exeCode, @Param("sectionId") String sectionId, @Param("chapId") String chapId);
 
     // Liste agents par chapId, natId
     @Query(value = "select t.TRTAG_ID idTraitement, t.TRTAG_AGT_MAT matricule, a.AFFAG_AGT_PRENOMS prenom, a.AFFAG_AGT_NOM nom,\n" +

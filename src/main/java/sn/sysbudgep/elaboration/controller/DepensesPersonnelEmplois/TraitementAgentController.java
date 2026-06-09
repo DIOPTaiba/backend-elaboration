@@ -2,10 +2,14 @@ package sn.sysbudgep.elaboration.controller.DepensesPersonnelEmplois;
 
 import org.springframework.web.bind.annotation.*;
 import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
+import sn.sysbudgep.elaboration.dto.classe.ResponseDto;
+import sn.sysbudgep.elaboration.dto.classe.TraitementsAgentDto;
 import sn.sysbudgep.elaboration.dto.depensesPersonnelEmplois.TraitementAgentDto;
 import sn.sysbudgep.elaboration.dto.global.AgentsDto;
 import sn.sysbudgep.elaboration.service.depenesPersonnelEmplois.TraitementAgentService;
 
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.List;
 
 @RestController
@@ -36,5 +40,11 @@ public class TraitementAgentController {
     @PostMapping(value = "/agentsChapNatId")
     public List<AgentsDto> agentsChapNatId(@RequestBody ParametreRechercheDTO pr){
         return traitementAgentService.agentsChapNatId(pr);
+    }
+
+    // Modification traitement collectif
+    @PostMapping(value = "/majTraitementAgent")
+    public ResponseDto majTraitementAgent(@RequestBody List<TraitementsAgentDto> tr) throws SQLException, ParseException {
+        return traitementAgentService.majTraitementAgent(tr);
     }
 }
