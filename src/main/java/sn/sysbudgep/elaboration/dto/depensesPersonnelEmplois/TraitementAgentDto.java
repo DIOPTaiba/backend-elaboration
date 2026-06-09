@@ -6,6 +6,7 @@ public interface TraitementAgentDto {
     String getParagraphe();
     String getCodeLigne();
     String getLibLigne();
+    String getIdLigne();
     String getObservation();
     String getTexteReference();
     BigDecimal getMontant();
