@@ -24,14 +24,32 @@ public class AgentsController {
 
     // Tous les agents par chapitre ou un seul agent si matricule est renseigné
     @PostMapping(value = "")
-    public List<AgentsDto> agents(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
+    public List<AgentsDto> agents(@RequestBody ParametreRechercheDTO pr) {
         return agentsService.agents(pr);
     }
 
     // Ajputer agent
-    @PostMapping(value = "/ajouterAgent")
+    /*@PostMapping(value = "/ajouterAgent")
     public ResponseDto ajouterAgent(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
         return agentsService.ajouterAgent(pr);
+    }*/
+
+    // Agents flottants
+    @PostMapping(value = "/flottants")
+    public List<AgentsDto> agentsFlottants() {
+        return agentsService.agentsFlottants();
+    }
+
+    // Agents non affectés dans un chapitre
+    @PostMapping(value = "/nonAffectesChap")
+    public List<AgentsDto> agentsNonAffectesChap(@RequestBody ParametreRechercheDTO pr)  {
+        return agentsService.agentsNonAffectesChap(pr);
+    }
+
+    // Agents à intégrer ( agents sans chapitre et agents flottants)
+    @PostMapping(value = "/agentsAIntegrer")
+    public List<AgentsDto> agentsAIntegrer(@RequestBody ParametreRechercheDTO pr) {
+        return agentsService.agentsAIntegrer(pr);
     }
 
 }

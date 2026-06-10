@@ -1,7 +1,9 @@
 package sn.sysbudgep.elaboration.service.depenesPersonnelEmplois;
 
 import org.springframework.stereotype.Service;
+import sn.sysbudgep.elaboration.dto.classe.AffectationAgentDto;
 import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
+import sn.sysbudgep.elaboration.dto.classe.ResponseDto;
 import sn.sysbudgep.elaboration.dto.depensesPersonnelEmplois.MajEmploisEffectifsDto;
 
 import java.sql.SQLException;
@@ -12,5 +14,8 @@ import java.util.List;
 public interface MajEmploisEffectifsService {
     // Chapitre et effectifs
     List<MajEmploisEffectifsDto> chapitreEffectifs(ParametreRechercheDTO pr) throws SQLException, ParseException;
+
+    // Intégration agent (ajouter agent sans chapitre ou flottants)
+    ResponseDto integrerAgent(List<AffectationAgentDto> affectationAgentDto) throws SQLException, ParseException;
 
 }

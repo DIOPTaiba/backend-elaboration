@@ -91,4 +91,60 @@ public interface AgentsRepository extends JpaRepository<SaisieMajFctInves, Strin
     List<AgentsDto> agents(@Param("exeCode") String exeCode, @Param("chapId") String chapId,
                            @Param("matricule") String matricule, @Param("codeEmploi") String codeEmploi);
 
+    // Agents flottants
+    @Query(value = "select a.AFFAG_AGT_MAT matricule, a.AFFAG_AGT_PRENOMS prenom, a.AFFAG_AGT_NOM nom, \n" +
+            "e.EMPAG_LIB emploi, a.AFFAG_OBS_SEC observation, a.AFFAG_TEXTE_REF_SEC texteReference,\n" +
+            "a.AFFAG_SEC_ID_PREC sectionIdPrecedant, \n" +
+            "CASE\n" +
+            "    WHEN a.AFFAG_AGT_CATEG = 'FP' THEN 'agent'\n" +
+            "        ELSE 'contractuel'\n" +
+            "    END AS statut\n" +
+            "FROM vb3_agent_flottant a\n" +
+            "JOIN vb3_emploi_agent e\n" +
+            "    ON a.AFFAG_EMPAG_ID = e.EMPAG_ID\n" +
+            "ORDER BY a.AFFAG_AGT_PRENOMS", nativeQuery = true)
+    List<AgentsDto> agentsFlottants();
+
+    // Agents non affectés dans un chapitre
+    @Query(value = "select a.AFFAG_AGT_MAT matricule, a.AFFAG_AGT_PRENOMS prenom, a.AFFAG_AGT_NOM nom, \n" +
+            "e.EMPAG_LIB emploi, a.AFFAG_OBS_SEC observation, a.AFFAG_TEXTE_REF_SEC texteReference,\n" +
+            "a.AFFAG_SEC_ID_PREC sectionIdPrecedant, \n" +
+            "CASE\n" +
+            "    WHEN a.AFFAG_AGT_CATEG = 'FP' THEN 'agent'\n" +
+            "        ELSE 'contractuel'\n" +
+            "    END AS statut\n" +
+            "from VB3_AFFECTATION_AGENT a\n" +
+            "JOIN vb3_emploi_agent e\n" +
+            "    ON a.AFFAG_EMPAG_ID = e.EMPAG_ID\n" +
+            "where AFFAG_SEC_ID=:sectionId and AFFAG_CHAP_ID is NULL\n" +
+            "and  AFFAG_DATE_CESS is NULL and AFFAG_AGT_CATEG IN ('FP','CO','PL')\n" +
+            "ORDER BY a.AFFAG_AGT_PRENOMS", nativeQuery = true)
+    List<AgentsDto> agentsNonAffectesChap(@Param("sectionId") String sectionId);
+
+    // Agents à intégrer ( agents sans chapitre et agents flottants)
+    @Query(value = "select a.AFFAG_EXPB_CODE exeCode, a.AFFAG_AGT_MAT matricule, a.AFFAG_AGT_PRENOMS prenom, a.AFFAG_AGT_NOM nom, \n" +
+            "e.EMPAG_LIB emploi, a.AFFAG_OBS_SEC observation, a.AFFAG_TEXTE_REF_SEC texteReference, a.AFFAG_SEC_ID sectionId,\n" +
+            "a.AFFAG_SEC_ID_PREC sectionIdPrecedant, a.AFFAG_CHAP_ID chapId, a.AFFAG_CHAP_ID_PREC chapIdPrecedant,\n" +
+            "CASE\n" +
+            "    WHEN a.AFFAG_AGT_CATEG = 'FP' THEN 'agent'\n" +
+            "        ELSE 'contractuel'\n" +
+            "    END AS statut\n" +
+            "from VB3_AFFECTATION_AGENT a\n" +
+            "JOIN vb3_emploi_agent e\n" +
+            "    ON a.AFFAG_EMPAG_ID = e.EMPAG_ID\n" +
+            "where AFFAG_SEC_ID=:sectionId and AFFAG_CHAP_ID is NULL\n" +
+            "and  AFFAG_DATE_CESS is NULL and AFFAG_AGT_CATEG IN ('FP','CO','PL')\n" +
+            "UNION\n" +
+            "select a.AFFAG_EXPB_CODE exeCode, a.AFFAG_AGT_MAT matricule, a.AFFAG_AGT_PRENOMS prenom, a.AFFAG_AGT_NOM nom, \n" +
+            "e.EMPAG_LIB emploi, a.AFFAG_OBS_SEC observation, a.AFFAG_TEXTE_REF_SEC texteReference, a.AFFAG_SEC_ID sectionId,\n" +
+            "a.AFFAG_SEC_ID_PREC sectionIdPrecedant, null chapId, null chapIdPrecedant,\n" +
+            "CASE\n" +
+            "    WHEN a.AFFAG_AGT_CATEG = 'FP' THEN 'agent'\n" +
+            "        ELSE 'contractuel'\n" +
+            "    END AS statut\n" +
+            "FROM vb3_agent_flottant a\n" +
+            "JOIN vb3_emploi_agent e\n" +
+            "    ON a.AFFAG_EMPAG_ID = e.EMPAG_ID", nativeQuery = true)
+    List<AgentsDto> agentsAIntegrer(@Param("sectionId") String sectionId);
+
 }

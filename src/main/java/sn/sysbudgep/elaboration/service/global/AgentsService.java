@@ -14,4 +14,13 @@ public interface AgentsService {
     // Ajouter agent
     ResponseDto ajouterAgent(ParametreRechercheDTO pr) throws SQLException, ParseException;
 
+    // Agents flottants
+    List<AgentsDto> agentsFlottants();
+
+    // Agents non affectés dans un chapitre
+    List<AgentsDto> agentsNonAffectesChap(ParametreRechercheDTO pr);
+
+    // Agents à intégrer ( agents sans chapitre et agents flottants)
+    List<AgentsDto> agentsAIntegrer(ParametreRechercheDTO pr);
+
 }

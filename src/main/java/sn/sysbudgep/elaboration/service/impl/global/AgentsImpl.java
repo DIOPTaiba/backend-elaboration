@@ -91,4 +91,22 @@ public class AgentsImpl implements AgentsService {
 
         return responseDto;
     }
+
+    // Agents flottants
+    @Override
+    public List<AgentsDto> agentsFlottants() {
+        return agentsRepository.agentsFlottants();
+    }
+
+    // Agents non affectés dans un chapitre
+    @Override
+    public List<AgentsDto> agentsNonAffectesChap(ParametreRechercheDTO pr) {
+        return agentsRepository.agentsNonAffectesChap(pr.getSectionId());
+    }
+
+    // Agents à intégrer ( agents sans chapitre et agents flottants)
+    @Override
+    public List<AgentsDto> agentsAIntegrer(ParametreRechercheDTO pr) {
+        return agentsRepository.agentsAIntegrer(pr.getSectionId());
+    }
 }

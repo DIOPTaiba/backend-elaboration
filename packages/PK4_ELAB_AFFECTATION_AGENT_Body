@@ -1,0 +1,111 @@
+CREATE OR REPLACE
+PACKAGE BODY PK4_ELAB_AFFECTATION_AGENT AS
+
+  --- -------------------------------------------------------------------------------------*/
+FUNCTION F_NEXT_ID return number is
+  cursor c_max is select max(affag_id) from tb_affectation_agent;
+  v_max number;
+begin
+  open c_max;
+  fetch c_max into v_max;
+  close c_max;
+  return nvl(v_max,0)+1;
+end F_NEXT_ID;
+---------------------------------------------------------------------------------------
+FUNCTION F_PTIL_AFFECTER(pexpb varchar2, p_sec varchar2, p_foncact varchar2) return number is
+  cursor c is select act_mat from tb_acteur where act_login=user;
+  --renvoie 1 si l'acteur peut mettre a jour les affectations des agents dans la section, 0 sinon :PPPB20
+  v_val number;
+  v_matricule varchar2(10);
+begin
+
+  open c;
+  fetch c into v_matricule;
+  close c;
+  if fb3_verrou_sectoriel(p_foncact, v_matricule)<>1 then
+     return 0;
+  else
+     return 1;
+  end if;
+
+  --v_val := PK3_PRIVILEGE_PPPB.f_get_priv_sur_sec(pexpb, p_foncact, p_sec, null, 'PPPB20');
+  --return v_val;
+end F_PTIL_AFFECTER;
+---------------------------------------------------------------------------------------
+FUNCTION F_PTIL_AFF_DANS_PROG(pexpb varchar2, p_prog varchar2, p_foncact varchar2) return number is
+  --renvoie 1 si l'acteur peut mettre a jour les affectations des agents dans le programme, 0 sinon :PPPB21
+  v_val number;
+begin
+  return 1;
+  v_val := PK3_PRIVILEGE_PPPB.f_get_priv_sur_prog(pexpb, p_foncact, p_prog, null, 'PPPB21');
+  return v_val;
+end F_PTIL_AFF_DANS_PROG;
+---------------------------------------------------------------------------------------
+FUNCTION F_IS_MODIFIABLE(pexpb varchar2, p_sec varchar2) return number is
+  --renvoie 1 si les affectations dans la section et dans ses chapitres peuvent etre modifiees, 0 sinon
+  v_val number;
+begin
+  v_val:=1;
+  return v_val;
+end F_IS_MODIFIABLE;
+---------------------------------------------------------------------------------------
+FUNCTION F_IS_MODIFIABLE(pexpb varchar2, p_sec varchar2, p_prog varchar2) return number is
+  --renvoie 1 si les affectations dans le programme peuvent etre modifiees, 0 sinon
+  v_val number;
+begin
+  v_val:=1;
+  return v_val;
+end F_IS_MODIFIABLE;
+--- -------------------------------------------------------------------------------------
+FUNCTION f_next_code RETURN varchar2 AS
+    --  a  partir de la version ministerielle retrouver EXPB_EXE dans la table tb_exercice_projet_bud
+    cursor c_code is select max(TO_NUMBER(AFFAG_ID)) from TB_AFFECTATION_AGENT;
+    v_max number;
+    begin
+      open c_code;
+      fetch c_code into v_max;
+      close c_code;
+      v_max:=nvl(v_max,0)+1;
+      return v_max;
+  END f_next_code;
+------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------------*/
+PROCEDURE P_UPADTE_AFFEC(P_EXPB_CODE varchar2,
+                         P_MAT varchar2,
+                         P_CHAP_ID varchar2,
+                         P_CHAP_ID_PREC varchar2,
+                         p_SEC_ID varchar2,
+                         P_SEC_ID_PREC varchar2,
+                         P_TEXTE_REF varchar2,
+                         P_OBS varchar2,
+                         P_FONCID_MODIF varchar2,
+                         P_AFFEC_TYP varchar2,
+                         P_ETAT OUT NUMBER,
+                         P_ERREUR OUT VARCHAR2) IS
+    V_TEXTE_REF_CHAP VARCHAR2(100 BYTE);
+    V_OBS_CHAP VARCHAR2(4000 BYTE);
+    V_TEXTE_REF_SEC VARCHAR2(100 BYTE);
+    V_OBS_SEC VARCHAR2(4000 BYTE);
+BEGIN
+     IF P_AFFEC_TYP='C' THEN
+         V_TEXTE_REF_CHAP := P_TEXTE_REF;
+         V_OBS_CHAP := P_OBS;
+     ELSE
+        V_TEXTE_REF_SEC := P_TEXTE_REF;
+         V_OBS_SEC := P_OBS;
+     END IF;
+  UPDATE TB_AFFECTATION_AGENT
+  set AFFAG_CHAP_ID=P_CHAP_ID, AFFAG_CHAP_ID_PREC=P_CHAP_ID_PREC,
+      AFFAG_SEC_ID=p_SEC_ID, AFFAG_SEC_ID_PREC=P_SEC_ID_PREC,
+      AFFAG_TEXTE_REF_CHAP=V_TEXTE_REF_CHAP, AFFAG_OBS_CHAP=V_OBS_CHAP,
+      AFFAG_TEXTE_REF_SEC=V_TEXTE_REF_SEC, AFFAG_OBS_SEC=V_OBS_SEC,
+      AFFAG_FONCACT_ID_MODIF=P_FONCID_MODIF, AFFAG_DATE_MODIF=sysdate
+  where AFFAG_EXPB_CODE=P_EXPB_CODE and AFFAG_AGT_MAT=P_MAT;
+EXCEPTION
+    when others then
+       P_ETAT := 0;
+       P_ERREUR:=SQLERRM;
+END P_UPADTE_AFFEC;
+
+END PK4_ELAB_AFFECTATION_AGENT;

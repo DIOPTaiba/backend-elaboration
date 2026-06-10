@@ -1,7 +1,10 @@
 package sn.sysbudgep.elaboration.controller.DepensesPersonnelEmplois;
 
 import org.springframework.web.bind.annotation.*;
+import sn.sysbudgep.elaboration.dto.classe.AffectationAgentDto;
 import sn.sysbudgep.elaboration.dto.classe.ParametreRechercheDTO;
+import sn.sysbudgep.elaboration.dto.classe.ResponseDto;
+import sn.sysbudgep.elaboration.dto.classe.TraitementsAgentDto;
 import sn.sysbudgep.elaboration.dto.depensesPersonnelEmplois.MajEmploisEffectifsDto;
 import sn.sysbudgep.elaboration.service.depenesPersonnelEmplois.MajEmploisEffectifsService;
 
@@ -25,6 +28,12 @@ public class MajEffectifsEmploisController {
     @PostMapping(value = "chapitreEffectifs")
     public List<MajEmploisEffectifsDto> chapitreEffectifs(@RequestBody ParametreRechercheDTO pr) throws SQLException, ParseException {
         return majEmploisEffectifsService.chapitreEffectifs(pr);
+    }
+
+    // Intégration agent (ajouter agent sans chapitre ou flottants)
+    @PostMapping(value = "/integrerAgent")
+    public ResponseDto integrerAgent(@RequestBody List<AffectationAgentDto> a) throws SQLException, ParseException {
+        return majEmploisEffectifsService.integrerAgent(a);
     }
 
 }
