@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class AffectationAgentDto {
     private String exeCode="";
+    private Integer idTraitement;
     private String matricule="";
     private String chapId="";
     private String chapIdPrecedant="";

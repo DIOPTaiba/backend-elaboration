@@ -36,4 +36,10 @@ public class MajEffectifsEmploisController {
         return majEmploisEffectifsService.integrerAgent(a);
     }
 
+    // Maj Affectation chapitre
+    @PostMapping(value = "/majAffectationChapitre")
+    public ResponseDto majAffectationChapitre(@RequestBody AffectationAgentDto a) throws SQLException, ParseException {
+        return majEmploisEffectifsService.majAffectationChapitre(a);
+    }
+
 }

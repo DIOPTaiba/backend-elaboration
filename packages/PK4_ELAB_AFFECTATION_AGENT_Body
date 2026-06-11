@@ -1,5 +1,4 @@
-CREATE OR REPLACE
-PACKAGE BODY PK4_ELAB_AFFECTATION_AGENT AS
+create or replace PACKAGE BODY PK4_ELAB_AFFECTATION_AGENT AS
 
   --- -------------------------------------------------------------------------------------*/
 FUNCTION F_NEXT_ID return number is
@@ -88,6 +87,7 @@ PROCEDURE P_UPADTE_AFFEC(P_EXPB_CODE varchar2,
     V_TEXTE_REF_SEC VARCHAR2(100 BYTE);
     V_OBS_SEC VARCHAR2(4000 BYTE);
 BEGIN
+    P_ETAT := 1;
      IF P_AFFEC_TYP='C' THEN
          V_TEXTE_REF_CHAP := P_TEXTE_REF;
          V_OBS_CHAP := P_OBS;
@@ -107,5 +107,123 @@ EXCEPTION
        P_ETAT := 0;
        P_ERREUR:=SQLERRM;
 END P_UPADTE_AFFEC;
+
+------------------------------------------------------------
+PROCEDURE P_MAJ_AFF_CHAP
+  (P_ID number,
+   P_CHAP varchar2,
+   P_CHAP_PREC varchar2,
+   P_TEXTE_REF_CHAP varchar2,
+   P_OBS_CHAP varchar2,
+   P_ACTEUR varchar2,
+   P_ETAT OUT number,
+   P_ERREUR OUT VARCHAR2) IS
+/*cette procedure permet de modifier les affectations internes*/
+  cursor c_verif_aff is select AFFAG_EXPB_CODE, AFFAG_SEC_ID from TB_AFFECTATION_AGENT where AFFAG_ID=P_ID;
+  cursor c_verif_chap is select 'X' from tb_chapitre where chap_id=P_CHAP;
+  l_verif_aff c_verif_aff%rowtype;
+  v_verif_chap varchar2(1);
+  v_chap varchar2(20);
+  v_matricule varchar2(10);
+  v_pro_id varchar2(10);
+  v_pro_id_activ varchar2(10);
+  v_action_id varchar2(10);
+  v_activite_id varchar2(10);
+
+BEGIN
+
+ /* p_etat:=0;
+  p_erreur:='La mise à jour des affectations des agents est verrouillée.';
+  return;  */
+
+  if P_CHAP is null then
+     p_etat:=0;
+     p_erreur:='La reference du chapitre d''affection n''est pas renseignee.';
+     return;
+  end if;
+
+
+  open c_verif_aff;
+  fetch c_verif_aff into l_verif_aff;
+  if c_verif_aff%notfound then
+     close c_verif_aff;
+     p_etat:=0;
+     p_erreur:='L''affection n° '||P_ID||' n''existe pas dans le systeme';
+     return;
+  end if;
+  close c_verif_aff;
+
+  open c_verif_chap;
+  fetch c_verif_chap into v_verif_chap;
+  if c_verif_chap%notfound and P_CHAP<>'00000' then
+     close c_verif_chap;
+     p_etat:=0;
+     p_erreur:='L''Id de chapitre n° '||P_CHAP||' n''existe pas dans le systeme';
+     return;
+  end if;
+  close c_verif_chap;
+
+  /*verifier si l'acteur est habilite*/
+  if F_PTIL_AFFECTER(l_verif_aff.AFFAG_EXPB_CODE, l_verif_aff.AFFAG_SEC_ID, P_ACTEUR)<>1 then
+     p_etat:=0;
+     p_erreur:='La mise a jour du personnel de la section est verrouilée à votre profil.';
+     return;
+  end if;
+  /*verifier si des modifications peuvent etre apportees*/
+  if F_IS_MODIFIABLE(l_verif_aff.AFFAG_EXPB_CODE, l_verif_aff.AFFAG_SEC_ID)<>1 then
+     p_etat:=0;
+     p_erreur:='Le niveau d''execution courant ne permet pas la mise a jour du personnel de la section';
+     return;
+  end if;
+
+  v_chap:=P_CHAP;
+
+  if P_CHAP='00000' then
+       v_chap:='';
+  end if;
+
+
+  select AFFAG_AGT_MAT into v_matricule from TB_AFFECTATION_AGENT where AFFAG_ID = P_ID;--- DIALLO
+
+  select (select p.pc_pro_id from tb_prog_chapitre p where p.pc_chap_id=v_chap and p.pc_valide='O') into v_pro_id
+  from TB_AFFECTATION_AGENT where AFFAG_ID = P_ID;--- DIALLO
+
+ if v_pro_id is not null then
+
+ begin
+  select unique (select p.cop_pro_id from tb_comp_prog p where p.cop_id=AFFAG_ACTV_ID ),AFFAG_COP_ID,AFFAG_ACTV_ID
+  into v_pro_id_activ,v_action_id,v_activite_id
+  from TB_AFFECTATION_AGENT where AFFAG_CHAP_ID = v_chap;
+
+  exception
+    when others then
+      null;
+  end;
+
+ end if;
+
+  UPDATE TB_AFFECTATION_AGENT
+  SET AFFAG_CHAP_ID=v_chap, AFFAG_CHAP_ID_PREC=P_CHAP_PREC,
+  AFFAG_PRO_ID=v_pro_id,AFFAG_COP_ID=decode(v_pro_id,v_pro_id_activ,v_action_id,''),
+  AFFAG_ACTV_ID=decode(v_pro_id,v_pro_id_activ,v_activite_id,''),
+  AFFAG_TEXTE_REF_CHAP=P_TEXTE_REF_CHAP, AFFAG_OBS_CHAP=P_OBS_CHAP,
+  AFFAG_TYP='C', AFFAG_FONCACT_ID_MODIF=p_acteur, AFFAG_DATE_MODIF=sysdate
+  WHERE AFFAG_ID=P_ID;
+
+
+
+  UPDATE TB_TRAITEMENT_AGENT A --- DIALLO
+  SET A.TRTAG_MONT=NVL(A.TRTAG_MONT,0)
+  WHERE A.TRTAG_AGT_MAT= v_matricule;
+
+  P_ETAT :=1 ;
+
+  EXCEPTION
+    when others then
+       P_ETAT := 0;
+       ROLLBACK;
+       P_ERREUR:=SQLERRM;
+END P_MAJ_AFF_CHAP;
+--- -------------------------------------------------------------------------------------*/
 
 END PK4_ELAB_AFFECTATION_AGENT;

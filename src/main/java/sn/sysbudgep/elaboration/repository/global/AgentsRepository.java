@@ -14,8 +14,11 @@ public interface AgentsRepository extends JpaRepository<SaisieMajFctInves, Strin
 
     @Query(value = "SELECT\n" +
             "    e.EMPAG_CODE, e.EMPAG_LIB AS emploi,\n" +
+            "    a.AFFAG_ID AS IdTraitement,\n" +
             "    a.AFFAG_AGT_MAT AS matricule,\n" +
             "    a.AFFAG_AGT_PRENOMS || ' ' || a.AFFAG_AGT_NOM AS nom,\n" +
+            "    a.AFFAG_CHAP_ID chapId,\n" +
+            "    a.AFFAG_CHAP_ID_PREC chapIdPrecedant,\n" +
             "    CASE \n" +
             "        WHEN a.AFFAG_AGT_CATEG = 'FP' THEN 'agent'\n" +
             "        ELSE 'contractuel'\n" +
@@ -79,7 +82,10 @@ public interface AgentsRepository extends JpaRepository<SaisieMajFctInves, Strin
             "GROUP BY\n" +
             "    e.EMPAG_CODE,\n" +
             "    e.EMPAG_LIB,\n" +
+            "    a.AFFAG_ID,\n" +
             "    a.AFFAG_AGT_MAT,\n" +
+            "    a.AFFAG_CHAP_ID,\n" +
+            "    a.AFFAG_CHAP_ID_PREC,\n" +
             "    a.AFFAG_AGT_PRENOMS || ' ' || a.AFFAG_AGT_NOM,\n" +
             "    CASE \n" +
             "        WHEN a.AFFAG_AGT_CATEG = 'FP' THEN 'agent'\n" +

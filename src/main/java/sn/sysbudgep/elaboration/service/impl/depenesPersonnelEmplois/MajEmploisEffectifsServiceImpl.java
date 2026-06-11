@@ -2,6 +2,7 @@ package sn.sysbudgep.elaboration.service.impl.depenesPersonnelEmplois;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
@@ -70,6 +71,7 @@ public class MajEmploisEffectifsServiceImpl implements MajEmploisEffectifsServic
                 );
 
         for (AffectationAgentDto a : affectationAgentDto) {
+            System.out.println("IIIIIIIIIIII "+affectationAgentDto.size());
 
             Map<String, Object> params = new HashMap<>();
             params.put("P_EXPB_CODE", a.getExeCode());
@@ -94,6 +96,54 @@ public class MajEmploisEffectifsServiceImpl implements MajEmploisEffectifsServic
             }
         }
         responseDto.setEtat(1);
+        return responseDto;
+    }
+
+    // Maj Affectation chapitre
+    @Override
+    public ResponseDto majAffectationChapitre(AffectationAgentDto a) throws SQLException, ParseException {
+        ResponseDto responseDto = new ResponseDto();
+        System.out.println("VVVVVVVVVVVVVVVVVVVVVVVVVV");
+        try {
+            SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate)
+                    .withCatalogName("PK4_ELAB_AFFECTATION_AGENT")
+                    .withProcedureName("P_MAJ_AFF_CHAP")
+                    // si plusieurs procédures avec même nom dans la BD oracle
+                    .withoutProcedureColumnMetaDataAccess()
+                    .declareParameters(
+                            new SqlParameter("P_ID", Types.NUMERIC),
+                            new SqlParameter("P_CHAP", Types.VARCHAR),
+                            new SqlParameter("P_CHAP_PREC", Types.VARCHAR),
+                            new SqlParameter("P_TEXTE_REF_CHAP", Types.VARCHAR),
+                            new SqlParameter("P_OBS_CHAP", Types.VARCHAR),
+                            new SqlParameter("P_ACTEUR", Types.VARCHAR),
+                            new SqlOutParameter("P_ETAT", Types.NUMERIC),
+                            new SqlOutParameter("P_ERREUR", Types.VARCHAR)
+                    );
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("P_ID", a.getIdTraitement());
+            params.put("P_CHAP", a.getChapId());
+            params.put("P_CHAP_PREC", a.getChapIdPrecedant());
+            params.put("P_TEXTE_REF_CHAP", a.getTextReference());
+            params.put("P_OBS_CHAP", a.getObservations());
+            params.put("P_ACTEUR", a.getFoncatIdModif());
+
+            Map<String, Object> result = call.execute(params);
+
+            // =====================
+            // MAPPING result
+            // =====================
+            responseDto.setEtat(getInteger(result, "P_ETAT"));
+            responseDto.setMessageErreur(getString(result, "P_ERREUR"));
+
+        } catch (DataAccessException e) {
+            logger.error("Erreur base de données procédure PK4_ELAB_AFFECTATION_AGENT.P_MAJ_AFF_CHAP", e);
+            throw new RuntimeException(
+                    "Erreur récupération résultat", e
+            );
+        }
+
         return responseDto;
     }
 

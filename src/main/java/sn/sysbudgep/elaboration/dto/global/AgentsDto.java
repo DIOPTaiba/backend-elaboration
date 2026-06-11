@@ -28,5 +28,9 @@ public interface AgentsDto {
     String getAge();
     String getObservation();
     String getTexteReference();
-    String getsectionIdPrecedant();
+    String getExeCode();
+    String getSectionId();
+    String getSectionIdPrecedant();
+    String getChapId();
+    String getChapIdPrecedant();
 }

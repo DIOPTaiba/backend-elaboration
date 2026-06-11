@@ -18,4 +18,7 @@ public interface MajEmploisEffectifsService {
     // Intégration agent (ajouter agent sans chapitre ou flottants)
     ResponseDto integrerAgent(List<AffectationAgentDto> affectationAgentDto) throws SQLException, ParseException;
 
+    // Maj Affectation chapitre
+    ResponseDto majAffectationChapitre(AffectationAgentDto affectationAgentDto) throws SQLException, ParseException;
+
 }

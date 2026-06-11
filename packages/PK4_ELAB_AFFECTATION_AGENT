@@ -1,5 +1,4 @@
-CREATE OR REPLACE
-PACKAGE PK4_ELAB_AFFECTATION_AGENT AS
+create or replace PACKAGE PK4_ELAB_AFFECTATION_AGENT AS
 
 FUNCTION F_NEXT_ID return number;
 FUNCTION F_PTIL_AFFECTER(pexpb varchar2, p_sec varchar2, p_foncact varchar2) return number ;
@@ -7,17 +6,26 @@ FUNCTION F_PTIL_AFF_DANS_PROG(pexpb varchar2, p_prog varchar2, p_foncact varchar
 FUNCTION F_IS_MODIFIABLE(pexpb varchar2, p_sec varchar2) return number;
 FUNCTION F_IS_MODIFIABLE(pexpb varchar2, p_sec varchar2, p_prog varchar2) return number;
 
-  PROCEDURE P_UPADTE_AFFEC(P_EXPB_CODE varchar2,
-                         P_MAT varchar2,
-                         P_CHAP_ID varchar2,
-                         P_CHAP_ID_PREC varchar2,
-                         p_SEC_ID varchar2,
-                         P_SEC_ID_PREC varchar2,
-                         P_TEXTE_REF varchar2,
-                         P_OBS varchar2,
-                         P_FONCID_MODIF varchar2,
-                         P_AFFEC_TYP varchar2,
-                         P_ETAT OUT NUMBER,
-                         P_ERREUR OUT VARCHAR2);
+PROCEDURE P_UPADTE_AFFEC(P_EXPB_CODE varchar2,
+                     P_MAT varchar2,
+                     P_CHAP_ID varchar2,
+                     P_CHAP_ID_PREC varchar2,
+                     p_SEC_ID varchar2,
+                     P_SEC_ID_PREC varchar2,
+                     P_TEXTE_REF varchar2,
+                     P_OBS varchar2,
+                     P_FONCID_MODIF varchar2,
+                     P_AFFEC_TYP varchar2,
+                     P_ETAT OUT NUMBER,
+                     P_ERREUR OUT VARCHAR2);
+
+PROCEDURE P_MAJ_AFF_CHAP(P_ID number,
+                           P_CHAP varchar2,
+                           P_CHAP_PREC varchar2,
+                           P_TEXTE_REF_CHAP varchar2,
+                           P_OBS_CHAP varchar2,
+                           P_ACTEUR varchar2,
+                           P_ETAT OUT NUMBER,
+                           P_ERREUR OUT VARCHAR2) ;
 
 END PK4_ELAB_AFFECTATION_AGENT;
