@@ -31,9 +31,9 @@ public class MajEffectifsEmploisController {
     }
 
     // Intégration agent (ajouter agent sans chapitre ou flottants)
-    @PostMapping(value = "/integrerAgent")
+    @PostMapping(value = "/updateAffectation")
     public ResponseDto integrerAgent(@RequestBody List<AffectationAgentDto> a) throws SQLException, ParseException {
-        return majEmploisEffectifsService.integrerAgent(a);
+        return majEmploisEffectifsService.updateAffectation(a);
     }
 
     // Maj Affectation chapitre

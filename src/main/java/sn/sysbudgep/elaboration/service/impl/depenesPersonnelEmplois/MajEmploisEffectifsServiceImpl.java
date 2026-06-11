@@ -46,10 +46,8 @@ public class MajEmploisEffectifsServiceImpl implements MajEmploisEffectifsServic
 
     // Intégration agent (ajouter agent sans chapitre ou flottants)
     @Override
-    public ResponseDto integrerAgent(List<AffectationAgentDto> affectationAgentDto) throws SQLException, ParseException {
+    public ResponseDto updateAffectation(List<AffectationAgentDto> affectationAgentDto) throws SQLException, ParseException {
         ResponseDto responseDto = new ResponseDto();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String dateInString = simpleDateFormat.format(new Date());
 
         SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate)
                 .withCatalogName("PK4_ELAB_AFFECTATION_AGENT")
@@ -71,7 +69,6 @@ public class MajEmploisEffectifsServiceImpl implements MajEmploisEffectifsServic
                 );
 
         for (AffectationAgentDto a : affectationAgentDto) {
-            System.out.println("IIIIIIIIIIII "+affectationAgentDto.size());
 
             Map<String, Object> params = new HashMap<>();
             params.put("P_EXPB_CODE", a.getExeCode());
